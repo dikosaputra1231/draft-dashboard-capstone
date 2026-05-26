@@ -317,10 +317,10 @@ elif page == "🔍 Skill Demand":
                              color='count', color_continuous_scale='Blues', text='count')
                 fig.update_traces(textposition='outside')
                 fig.update_layout(height=max(300, n_skills * 35),
-                                  yaxis={'categoryorder': 'total ascending'},
-                                  coloraxis_showscale=False,
-                                  title=f"Top {n_skills} Skill - {role_sel} ({len(df_role):,} loker)",
-                                  **PLOTLY_THEME)
+                  coloraxis_showscale=False,
+                  title=f"Top {n_skills} Skill - {role_sel} ({len(df_role):,} loker)",
+                  **PLOTLY_THEME)
+                fig.update_yaxes(categoryorder='total ascending')
                 st.plotly_chart(fig, use_container_width=True)
 
         with col2:
@@ -380,8 +380,8 @@ elif page == "📈 Hiring Trends":
                          color='avg_applicants', color_continuous_scale='RdYlGn_r',
                          text='avg_applicants')
             fig.update_traces(texttemplate='%{text:.1f}', textposition='outside')
-            fig.update_layout(height=650, coloraxis_showscale=False,
-                               yaxis={'categoryorder': 'total ascending'}, **PLOTLY_THEME)
+            fig.update_layout(height=650, coloraxis_showscale=False, **PLOTLY_THEME)
+            fig.update_yaxes(categoryorder='total ascending')
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
@@ -411,8 +411,8 @@ elif page == "📈 Hiring Trends":
             fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
             fig.add_vline(x=avg_remote, line_dash='dash', line_color='yellow',
                           annotation_text=f"Avg: {avg_remote:.1f}%")
-            fig.update_layout(height=600, coloraxis_showscale=False,
-                               yaxis={'categoryorder': 'total ascending'}, **PLOTLY_THEME)
+            fig.update_layout(height=600, coloraxis_showscale=False, **PLOTLY_THEME)
+            fig.update_yaxes(categoryorder='total ascending')
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
@@ -557,10 +557,8 @@ elif page == "🎓 Course Supply":
             fig.add_trace(go.Bar(name='Supply (Course)', y=gap_df['skill'], x=gap_df['supply'],
                                  orientation='h', marker_color='#7C3AED'))
             fig.update_layout(barmode='group', height=max(500, top_n_compare * 25),
-                               yaxis={'categoryorder': 'array',
-                                      'categoryarray': gap_df.sort_values('demand')['skill'].tolist()},
-                               title=f"Top {top_n_compare} Skill: Demand vs Supply",
-                               **PLOTLY_THEME)
+                              title=f"Top {top_n_compare} Skill: Demand vs Supply", **PLOTLY_THEME)
+            fig.update_yaxes(categoryorder='array', categoryarray=gap_df.sort_values('demand')['skill'].tolist())
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
@@ -571,10 +569,9 @@ elif page == "🎓 Course Supply":
                           color='gap_ratio', color_continuous_scale='Reds',
                           text=gap_top['gap_ratio'].round(1))
             fig2.update_traces(texttemplate='%{text:.1f}x', textposition='outside')
-            fig2.update_layout(height=max(400, 15 * 30), coloraxis_showscale=False,
-                               yaxis={'categoryorder': 'total ascending'},
-                               xaxis_title='Demand/Supply Ratio',
-                               title="Gap Ratio (Demand / Supply)", **PLOTLY_THEME)
+            fig2.update_layout(height=max(400, 15 * 30), coloraxis_showscale=False, 
+                   xaxis_title='Demand/Supply Ratio', title="Gap Ratio (Demand / Supply)", **PLOTLY_THEME)
+            fig2.update_yaxes(categoryorder='total ascending')
             st.plotly_chart(fig2, use_container_width=True)
 
         # Skill kategorisasi
