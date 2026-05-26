@@ -496,15 +496,17 @@ elif page == "🎓 Course Supply":
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader("Distribusi Course per Role")
-            cc = df_c['role_category'].value_counts().head(15).reset_index()
-            cc.columns = ['role', 'count']
-            fig = px.bar(cc, x='count', y='role', orientation='h',
-                         color='count', color_continuous_scale='Purples', text='count')
-            fig.update_traces(textposition='outside')
+            # Grouped bar: demand vs supply
+            fig = go.Figure()
+            fig.add_trace(go.Bar(name='Demand (Loker)', y=gap_df['skill'], x=gap_df['demand'],
+                                 orientation='h', marker_color='#2563EB'))
+            fig.add_trace(go.Bar(name='Supply (Course)', y=gap_df['skill'], x=gap_df['supply'],
+                                 orientation='h', marker_color='#7C3AED'))
             fig.update_layout(barmode='group', height=max(500, top_n_compare * 25),
-                  title=f"Top {top_n_compare} Skill: Demand vs Supply", **PLOTLY_THEME)
+                              title=f"Top {top_n_compare} Skill: Demand vs Supply",
+                              **PLOTLY_THEME)
             fig.update_yaxes(categoryorder='array', categoryarray=gap_df.sort_values('demand')['skill'].tolist())
+            
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
