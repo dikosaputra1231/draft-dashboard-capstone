@@ -204,8 +204,9 @@ if page == "🏠 Overview":
         fig = px.bar(rc, x='count', y='role', orientation='h',
                      color='count', color_continuous_scale='viridis', text='count')
         fig.update_traces(textposition='outside', textfont_size=10)
-        fig.update_layout(height=650, coloraxis_showscale=False,
-                          yaxis={'categoryorder': 'total ascending'}, **PLOTLY_THEME)
+        # KODE BARU (Benar)
+        fig.update_layout(height=650, coloraxis_showscale=False, **PLOTLY_THEME)
+        fig.update_yaxes(categoryorder='total ascending')
         st.plotly_chart(fig, use_container_width=True)
 
     with col_b:
@@ -225,8 +226,8 @@ if page == "🏠 Overview":
         fig3 = px.bar(cc, x='count', y='role', orientation='h',
                       color='count', color_continuous_scale='Purples', text='count')
         fig3.update_traces(textposition='outside', textfont_size=10)
-        fig3.update_layout(height=320, coloraxis_showscale=False,
-                           yaxis={'categoryorder': 'total ascending'}, **PLOTLY_THEME)
+        fig3.update_layout(height=320, coloraxis_showscale=False, **PLOTLY_THEME)
+        fig3.update_yaxes(categoryorder='total ascending')
         st.plotly_chart(fig3, use_container_width=True)
 
     # Top skills side-by-side
@@ -275,8 +276,8 @@ elif page == "🔍 Skill Demand":
             fig = px.bar(top_skills, x='count', y='skill', orientation='h',
                          color='count', color_continuous_scale='viridis', text='count')
             fig.update_traces(textposition='outside')
-            fig.update_layout(height=max(400, top_n * 22), coloraxis_showscale=False,
-                               yaxis={'categoryorder': 'total ascending'}, **PLOTLY_THEME)
+            fig.update_layout(height=max(400, top_n * 22), coloraxis_showscale=False, **PLOTLY_THEME)
+            fig.update_yaxes(categoryorder='total ascending')
             st.plotly_chart(fig, use_container_width=True)
 
         st.subheader("Tren Top 8 Skill per Tahun")
@@ -501,8 +502,9 @@ elif page == "🎓 Course Supply":
             fig = px.bar(cc, x='count', y='role', orientation='h',
                          color='count', color_continuous_scale='Purples', text='count')
             fig.update_traces(textposition='outside')
-            fig.update_layout(height=450, coloraxis_showscale=False,
-                               yaxis={'categoryorder': 'total ascending'}, **PLOTLY_THEME)
+            fig.update_layout(barmode='group', height=max(500, top_n_compare * 25),
+                  title=f"Top {top_n_compare} Skill: Demand vs Supply", **PLOTLY_THEME)
+            fig.update_yaxes(categoryorder='array', categoryarray=gap_df.sort_values('demand')['skill'].tolist())
             st.plotly_chart(fig, use_container_width=True)
 
         with col2:
