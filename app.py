@@ -467,8 +467,8 @@ role_profiles, mlb, sel_skills = build_role_profiles(df)
 
 with st.sidebar:
     st.divider()
-    st.caption(f"Lowongan Aktif: {len(df):,} / {len(df_raw):,}")
-    st.caption(f"Kursus Aktif: {len(df_c):,} / {len(df_c_raw):,}")
+    st.caption(f"Jumlah Lowongan: {len(df):,}")
+    st.caption(f"Jumlah Kursus: {len(df_c):,}")
     st.caption("Sumber: LinkedIn & Coursera Catalog")
 
 # ─────────────────────────────────────────────────────────────────
