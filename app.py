@@ -2,6 +2,7 @@
 app.py — QLOP Market Insight Dashboard
 =======================================
 Fixed high-contrast dark theme — readable in any browser/OS mode.
+Enhanced with modern premium UI/UX design, interactive elements, and sidebar filters.
 """
 
 import streamlit as st
@@ -31,7 +32,7 @@ st.set_page_config(
 # ─────────────────────────────────────────────────────────────────
 BG       = "#0F172A"   # page background
 SURFACE  = "#1E293B"   # cards, sidebar
-SURFACE2 = "#273549"   # chart background (slightly lighter)
+SURFACE2 = "#273549"   # chart background / KPI card (slightly lighter)
 BORDER   = "#334155"   # dividers
 TEXT     = "#F1F5F9"   # primary text  (high contrast on BG)
 MUTED    = "#94A3B8"   # secondary text
@@ -82,49 +83,45 @@ small, .stCaption {{ color: {MUTED} !important; font-size: 12px !important; }}
 h1 {{ font-size: 1.7rem  !important; font-weight: 800 !important;
       color: {TEXT} !important; margin-bottom: 0 !important; }}
 h2 {{ font-size: 1.2rem  !important; font-weight: 700 !important;
-      color: {TEXT} !important; }}
+      color: {TEXT} !important; margin-top: 10px !important; }}
 h3 {{ font-size: 1.0rem  !important; font-weight: 600 !important;
       color: {TEXT} !important; }}
 
-/* ── Metric cards ─────────────────────────────────────────────── */
-[data-testid="metric-container"] {{
-    background: {SURFACE} !important;
-    border: 1px solid {BORDER} !important;
-    border-radius: 10px;
-    padding: 14px 18px;
-}}
-[data-testid="metric-container"] label {{
-    color: {MUTED} !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-}}
-[data-testid="metric-container"] [data-testid="stMetricValue"] {{
-    color: {TEXT} !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-}}
-[data-testid="stMetricDelta"] {{ font-size: 12px !important; }}
-
-/* ── Tabs ─────────────────────────────────────────────────────── */
+/* ── Tabs (Modern Segmented Pill Controller) ─────────────────── */
 [data-baseweb="tab-list"] {{
-    background: {BORDER} !important;
-    border-radius: 8px; gap: 3px; padding: 3px;
+    background-color: {SURFACE2} !important;
+    border-radius: 8px !important;
+    gap: 4px !important;
+    padding: 6px !important;
+    border-bottom: none !important;
+    margin-bottom: 20px !important;
 }}
 [data-baseweb="tab"] {{
     border-radius: 6px !important;
     color: {MUTED} !important;
-    font-weight: 500 !important;
-    font-size: 13px !important;
-    background: transparent !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    background-color: transparent !important;
+    padding: 8px 16px !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+}}
+[data-baseweb="tab"]:hover {{
+    color: {TEXT} !important;
+    background-color: rgba(255,255,255,0.05) !important;
 }}
 [aria-selected="true"] {{
-    background: {SURFACE} !important;
-    color: {BLUE} !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,.3) !important;
+    background-color: {BLUE} !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}}
+/* Hide standard Streamlit tab underline */
+[data-baseweb="tab-highlight-bar"] {{
+    display: none !important;
 }}
 
 /* ── Divider ─────────────────────────────────────────────────── */
-hr {{ border: none; border-top: 1px solid {BORDER}; margin: 16px 0; }}
+hr {{ border: none; border-top: 1px solid {BORDER}; margin: 20px 0; }}
 
 /* ── Stacked cards ───────────────────────────────────────────── */
 .qlop-card {{
@@ -133,6 +130,13 @@ hr {{ border: none; border-top: 1px solid {BORDER}; margin: 16px 0; }}
     border-radius: 12px;
     padding: 16px 18px;
     margin-bottom: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}}
+.qlop-card:hover {{
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: {BLUE};
 }}
 
 /* ── Hero ────────────────────────────────────────────────────── */
@@ -140,16 +144,21 @@ hr {{ border: none; border-top: 1px solid {BORDER}; margin: 16px 0; }}
     background: linear-gradient(135deg, #1D4ED8 0%, #7C3AED 100%);
     border-radius: 14px;
     padding: 28px 32px;
-    margin-bottom: 22px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }}
 .qlop-hero h1 {{ color: #FFFFFF !important; font-size: 1.85rem !important; margin: 0 !important; }}
-.qlop-hero p  {{ color: rgba(255,255,255,.80); margin: 6px 0 0; font-size: 14px; }}
+.qlop-hero p  {{ color: rgba(255,255,255,.90); margin: 8px 0 0; font-size: 14px; line-height: 1.5; }}
 
 /* ── Chips ───────────────────────────────────────────────────── */
 .chip {{
     display: inline-block; border-radius: 999px;
-    padding: 3px 12px; font-size: 12px; font-weight: 600;
-    margin: 3px 2px; line-height: 1.6;
+    padding: 4px 12px; font-size: 12px; font-weight: 600;
+    margin: 4px 3px; line-height: 1.6;
+    transition: transform 0.1s ease;
+}}
+.chip:hover {{
+    transform: scale(1.05);
 }}
 .chip-blue  {{ background:{CHIP_BLUE_BG};  color:{CHIP_BLUE_FG};  }}
 .chip-green {{ background:{CHIP_GREEN_BG}; color:{CHIP_GREEN_FG}; }}
@@ -194,9 +203,7 @@ input, textarea {{
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────
-# PLOTLY HELPERS
-# Fixed backgrounds that match the dark palette
-# make_layout does NOT include xaxis/yaxis to avoid kwarg conflicts
+# PLOTLY & UI HELPERS
 # ─────────────────────────────────────────────────────────────────
 GRID = "rgba(255,255,255,.07)"
 TICK = MUTED
@@ -226,6 +233,90 @@ def apply_legend(fig):
         font=dict(color=TEXT),
     ))
     return fig
+
+
+def kpi_card(title, value, icon, delta=None):
+    """Custom high-contrast styled metric card with icons and beautiful alignment."""
+    delta_html = ""
+    if delta:
+        color = GREEN if delta.startswith("+") else RED
+        delta_html = f"<div style='font-size: 12px; color: {color}; margin-top: 4px; font-weight: 600;'>{delta}</div>"
+    return f"""
+    <div style="
+        background-color: {SURFACE2};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 125px;
+    ">
+        <div style="font-size: 26px; margin-bottom: 8px;">{icon}</div>
+        <div style="font-size: 11px; color: {MUTED}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">{title}</div>
+        <div style="font-size: 26px; color: #FFFFFF; font-weight: 800; margin-top: 4px; line-height: 1.2;">{value}</div>
+        {delta_html}
+    </div>
+    """
+
+
+def hbar(data, x_col, y_col, color_scale="Blues", height=400, title="", x_label="Jumlah/Frekuensi"):
+    """Interactive horizontal bar chart with Plotly."""
+    if data.empty:
+        fig = px.bar(title=title)
+        fig.update_layout(**make_layout(height))
+        return fig
+    
+    fig = px.bar(
+        data, x=x_col, y=y_col, orientation="h",
+        text=x_col, color=x_col, color_continuous_scale=color_scale,
+        title=title,
+    )
+    
+    # Safely check data type for formatting
+    is_int = False
+    if x_col in data.columns:
+        is_int = pd.api.types.is_integer_dtype(data[x_col])
+        
+    text_template = "%{text:,d}" if is_int else "%{text:.1f}"
+    if "%" in x_label or "pct" in x_col or "Persen" in x_label:
+        text_template = "%{text:.1f}%"
+        
+    fig.update_traces(
+        texttemplate=text_template,
+        textposition="outside",
+        marker_line_width=0,
+        hovertemplate="<b>%{y}</b><br>" + x_label + ": %{x}<extra></extra>"
+    )
+    fig.update_coloraxes(showscale=False)
+    fig.update_layout(
+        yaxis_categoryorder="total ascending",
+        xaxis_title=x_label, yaxis_title="",
+        title_font_size=13, title_font_color=TEXT,
+        **make_layout(height),
+    )
+    apply_axes(fig)
+    return fig
+
+
+def page_header(title, description, icon="📊"):
+    """Uniform beautiful header helper for inside pages."""
+    st.markdown(f"""
+    <div style="margin-bottom: 20px;">
+        <h1 style="display: flex; align-items: center; gap: 10px;">
+            <span>{icon}</span> {title}
+        </h1>
+        <p style="color: {MUTED}; margin: 6px 0 0; font-size: 14px; line-height: 1.4;">
+            {description}
+        </p>
+    </div>
+    <hr style="margin-top: 10px; margin-bottom: 20px;" />
+    """, unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -284,10 +375,14 @@ def build_counters(df_jobs, df_course):
 
 @st.cache_data(ttl=3600)
 def build_role_profiles(df):
+    if df.empty:
+        return pd.DataFrame(), None, []
     s_all: list = []
     df["skills_list"].apply(lambda l: s_all.extend(l))
     freq = Counter(s_all)
     sel  = sorted([s for s, c in freq.items() if c >= 15])
+    if not sel:
+        sel = sorted(list(freq.keys()))[:50] # fallback
     mlb  = MultiLabelBinarizer(classes=sel)
     X    = mlb.fit_transform(df["skills_list"])
     Xdf  = pd.DataFrame(X, columns=mlb.classes_)
@@ -296,56 +391,89 @@ def build_role_profiles(df):
 
 
 # ─────────────────────────────────────────────────────────────────
-# LOAD DATA
+# LOAD & FILTER DATA
 # ─────────────────────────────────────────────────────────────────
-df   = load_jobs()
-df_c = load_coursera()
-j_ctr, c_ctr, linkedin_vocab = build_counters(df, df_c)
-role_profiles, mlb, sel_skills = build_role_profiles(df)
+df_raw   = load_jobs()
+df_c_raw = load_coursera()
 
 # ─────────────────────────────────────────────────────────────────
 # SIDEBAR
 # ─────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown(f"""
-    <div style="text-align:center;padding:14px 0 18px;">
-        <div style="font-size:30px;margin-bottom:6px;">📊</div>
-        <div style="font-size:16px;font-weight:800;color:{TEXT};">QLOP</div>
-        <div style="font-size:12px;color:{MUTED};margin-top:2px;">Market Insight Dashboard</div>
+    <div style="text-align:center;padding:14px 0 10px;">
+        <div style="font-size:35px;margin-bottom:4px;">📊</div>
+        <div style="font-size:18px;font-weight:800;color:{TEXT};letter-spacing:1px;">QLOP ENGINE</div>
+        <div style="font-size:11px;color:{MUTED};margin-top:2px;text-transform:uppercase;">Market Insight Dashboard</div>
     </div>
     """, unsafe_allow_html=True)
     st.divider()
+    
     page = st.radio(
         "nav",
         ["Overview", "Skill Demand", "Hiring Trends", "Course Supply", "A/B Testing"],
         label_visibility="collapsed",
     )
+    
     st.divider()
-    st.caption(f"Loker: {len(df):,} · {df['role_label'].nunique()} roles")
-    st.caption(f"Course: {len(df_c):,} · Skill LinkedIn: {len(j_ctr):,}")
-    st.caption("LinkedIn Indonesia 2022–2026 · Coursera")
-
+    st.markdown("### 🔍 PENYARINGAN DATA")
+    
+    # 1. Filter Role
+    all_roles = sorted(df_raw["role_label"].dropna().unique())
+    selected_roles = st.multiselect(
+        "Filter Peran (Role)", 
+        all_roles, 
+        help="Kosongkan untuk menyertakan semua peran kerja"
+    )
+    
+    # 2. Filter Tahun Posting Loker
+    all_years = sorted(df_raw["year"].dropna().unique().astype(int))
+    selected_years = st.multiselect(
+        "Filter Tahun Posting",
+        all_years,
+        default=all_years
+    )
+    
+    # 3. Filter Difficulty Course
+    all_diffs = sorted(df_c_raw["difficulty"].dropna().unique())
+    selected_diffs = st.multiselect(
+        "Tingkat Kesulitan Kursus",
+        all_diffs,
+        default=all_diffs
+    )
+    
+    # 4. Filter Platform/Partner Course
+    all_partners = sorted(df_c_raw["partner"].dropna().unique())
+    selected_partners = st.multiselect(
+        "Platform / Provider Kursus",
+        all_partners,
+        help="Kosongkan untuk menyertakan semua platform"
+    )
 
 # ─────────────────────────────────────────────────────────────────
-# REUSABLE BAR (horizontal)
+# APPLY FILTERS
 # ─────────────────────────────────────────────────────────────────
-def hbar(data, x_col, y_col, color_scale="Blues", height=400, title=""):
-    fig = px.bar(
-        data, x=x_col, y=y_col, orientation="h",
-        text=x_col, color=x_col, color_continuous_scale=color_scale,
-        title=title,
-    )
-    fig.update_traces(textposition="outside", marker_line_width=0)
-    fig.update_coloraxes(showscale=False)
-    fig.update_layout(
-        yaxis_categoryorder="total ascending",
-        xaxis_title=x_col, yaxis_title="",
-        title_font_size=13, title_font_color=TEXT,
-        **make_layout(height),
-    )
-    apply_axes(fig)
-    return fig
+df = df_raw.copy()
+if selected_roles:
+    df = df[df["role_label"].isin(selected_roles)]
+if selected_years:
+    df = df[df["year"].isin(selected_years)]
 
+df_c = df_c_raw.copy()
+if selected_diffs:
+    df_c = df_c[df_c["difficulty"].isin(selected_diffs)]
+if selected_partners:
+    df_c = df_c[df_c["partner"].isin(selected_partners)]
+
+# Rebuild dependent dynamic models and metrics based on filtered subset
+j_ctr, c_ctr, linkedin_vocab = build_counters(df, df_c)
+role_profiles, mlb, sel_skills = build_role_profiles(df)
+
+with st.sidebar:
+    st.divider()
+    st.caption(f"Lowongan Aktif: {len(df):,} / {len(df_raw):,}")
+    st.caption(f"Kursus Aktif: {len(df_c):,} / {len(df_c_raw):,}")
+    st.caption("Sumber: LinkedIn Indonesia & Coursera Catalog")
 
 # ─────────────────────────────────────────────────────────────────
 # PAGE: OVERVIEW
@@ -353,75 +481,91 @@ def hbar(data, x_col, y_col, color_scale="Blues", height=400, title=""):
 if page == "Overview":
     st.markdown(f"""
     <div class="qlop-hero">
-      <h1>QLOP — Market Insight Dashboard</h1>
-      <p>Wawasan makro pasar kerja IT Indonesia untuk mendukung sistem analisis skills gap QLOP</p>
+      <h1>📊 QLOP — Market Insight Dashboard</h1>
+      <p>
+        Dashboard interaktif untuk memetakan dinamika pasar kerja IT Indonesia. Analisis mendalam 
+        terhadap kebutuhan keterampilan (skills gap) industri berdasarkan data LinkedIn serta penawaran pembelajaran dari Coursera.
+      </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # KPI
+    # Custom Centered KPI Card Grid
     k1, k2, k3, k4, k5, k6 = st.columns(6)
-    k1.metric("Total Loker",          f"{len(df):,}")
-    k2.metric("IT Roles",             df["role_label"].nunique())
-    k3.metric("Skill Unik",           f"{len(j_ctr):,}")
-    k4.metric("Total Course",         f"{len(df_c):,}")
-    k5.metric("Remote Work",          f"{df['workRemoteAllowed'].fillna(0).astype(float).mean()*100:.1f}%")
-    k6.metric("Avg Skill/Loker",      f"{df['skill_count'].mean():.1f}")
+    k1.markdown(kpi_card("Total Loker", f"{len(df):,}", "💼"), unsafe_allow_html=True)
+    k2.markdown(kpi_card("IT Roles", f"{df['role_label'].nunique() if not df.empty else 0}", "👤"), unsafe_allow_html=True)
+    k3.markdown(kpi_card("Skill Unik", f"{len(j_ctr):,}", "🛠️"), unsafe_allow_html=True)
+    k4.markdown(kpi_card("Total Course", f"{len(df_c):,}", "🎓"), unsafe_allow_html=True)
+    
+    remote_val = f"{df['workRemoteAllowed'].fillna(0).astype(float).mean()*100:.1f}%" if not df.empty else "0.0%"
+    k5.markdown(kpi_card("Remote Work", remote_val, "🏠"), unsafe_allow_html=True)
+    
+    avg_skill_val = f"{df['skill_count'].mean():.1f}" if not df.empty else "0.0"
+    k6.markdown(kpi_card("Avg Skill/Loker", avg_skill_val, "📊"), unsafe_allow_html=True)
 
     st.divider()
 
     # Row 1: role distribution + yearly trend + employment
     col_a, col_b = st.columns([3, 2], gap="medium")
     with col_a:
-        st.subheader("Distribusi Loker per Role IT")
-        rc = df["role_label"].value_counts().reset_index()
-        rc.columns = ["role", "count"]
-        fig = hbar(rc, "count", "role", height=620)
-        st.plotly_chart(fig, use_container_width=True)
+        st.subheader("📋 Distribusi Lowongan per Peran IT")
+        if not df.empty:
+            rc = df["role_label"].value_counts().reset_index()
+            rc.columns = ["role", "count"]
+            fig = hbar(rc, "count", "role", color_scale="Blues", height=600, x_label="Jumlah Lowongan")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("Tidak ada data lowongan pekerjaan untuk filter yang aktif.")
 
     with col_b:
-        st.subheader("Tren Posting Loker per Tahun")
-        yt = df[df["year"].between(2022, 2026)].groupby("year").size().reset_index(name="count")
-        fig2 = px.area(yt, x="year", y="count", markers=True,
-                       color_discrete_sequence=[BLUE])
-        fig2.update_traces(fill="tozeroy", fillcolor="rgba(59,130,246,.15)",
-                           line_width=2.5, marker_size=7)
-        fig2.update_layout(xaxis_title="Tahun", yaxis_title="Loker", **make_layout(235))
-        apply_axes(fig2)
-        st.plotly_chart(fig2, use_container_width=True)
+        st.subheader("📈 Tren Posting Loker per Tahun")
+        if not df.empty and df["year"].notna().any():
+            yt = df[df["year"].between(2022, 2026)].groupby("year").size().reset_index(name="count")
+            fig2 = px.area(yt, x="year", y="count", markers=True,
+                           color_discrete_sequence=[BLUE])
+            fig2.update_traces(fill="tozeroy", fillcolor="rgba(59,130,246,.15)",
+                               line_width=2.5, marker_size=7,
+                               hovertemplate="<b>Tahun %{x}</b><br>Lowongan: %{y}<extra></extra>")
+            fig2.update_layout(xaxis_title="Tahun", yaxis_title="Jumlah Lowongan", **make_layout(225))
+            apply_axes(fig2)
+            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("Pilih filter tahun yang valid untuk melihat tren tahunan.")
 
-        st.subheader("Employment Type")
-        em = df["employmentType"].value_counts().reset_index()
-        em.columns = ["type", "count"]
-        fig3 = px.pie(em, values="count", names="type", hole=0.55,
-                      color_discrete_sequence=px.colors.qualitative.Pastel)
-        fig3.update_traces(textposition="inside", textinfo="percent+label", textfont_size=11)
-        fig3.update_layout(showlegend=False, **make_layout(270))
-        st.plotly_chart(fig3, use_container_width=True)
+        st.subheader("👔 Jenis Pekerjaan (Employment Type)")
+        if not df.empty:
+            em = df["employmentType"].value_counts().reset_index()
+            em.columns = ["type", "count"]
+            fig3 = px.pie(em, values="count", names="type", hole=0.55,
+                          color_discrete_sequence=px.colors.qualitative.Pastel)
+            fig3.update_traces(textposition="inside", textinfo="percent+label", textfont_size=11,
+                               hovertemplate="<b>%{label}</b><br>Jumlah: %{value} (%{percent})<extra></extra>")
+            fig3.update_layout(showlegend=False, **make_layout(250))
+            st.plotly_chart(fig3, use_container_width=True)
+        else:
+            st.warning("Tidak ada data jenis pekerjaan.")
 
     st.divider()
 
-    # Row 2: top 10 skills side-by-side
-    st.subheader("Top 10 Skill — Demand (Loker) vs Supply (Coursera)")
+    # Row 2: top 10 skills side-by-side (Horizontal for premium space usage)
+    st.subheader("🔥 Top 10 Keterampilan — Permintaan (LinkedIn) vs Ketersediaan (Coursera)")
     ca, cb = st.columns(2, gap="medium")
     with ca:
         t10j = pd.DataFrame(j_ctr.most_common(10), columns=["skill", "count"])
-        fig = px.bar(t10j, x="skill", y="count", text="count",
-                     color_discrete_sequence=[BLUE],
-                     title="Skill Paling Dicari (LinkedIn)")
-        fig.update_traces(textposition="outside", marker_line_width=0)
-        fig.update_layout(xaxis_tickangle=-35, xaxis_title="", yaxis_title="Frekuensi",
-                          title_font_size=13, **make_layout(320))
-        apply_axes(fig)
+        fig = hbar(
+            t10j, "count", "skill", 
+            color_scale="Blues", height=380, 
+            title="Skill Paling Dicari Industri (LinkedIn Indonesia)",
+            x_label="Jumlah Lowongan"
+        )
         st.plotly_chart(fig, use_container_width=True)
     with cb:
         t10c = pd.DataFrame(c_ctr.most_common(10), columns=["skill", "count"])
-        fig = px.bar(t10c, x="skill", y="count", text="count",
-                     color_discrete_sequence=[VIOLET],
-                     title="Skill Tersedia di Coursera (sesuai vocab LinkedIn)")
-        fig.update_traces(textposition="outside", marker_line_width=0)
-        fig.update_layout(xaxis_tickangle=-35, xaxis_title="", yaxis_title="Frekuensi",
-                          title_font_size=13, **make_layout(320))
-        apply_axes(fig)
+        fig = hbar(
+            t10c, "count", "skill", 
+            color_scale="Purples", height=380, 
+            title="Ketersediaan Materi di Coursera (Sesuai Kosa Kata LinkedIn)",
+            x_label="Jumlah Kursus"
+        )
         st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
@@ -429,68 +573,74 @@ if page == "Overview":
     # Row 3: seniority + remote snapshot
     cs, cr = st.columns(2, gap="medium")
     with cs:
-        st.subheader("Distribusi Seniority Level")
+        st.subheader("🎓 Distribusi Seniority Level")
         df_sen = df[df["seniorityLevel"].isin(SEN_ORDER)]
-        sc = df_sen["seniorityLevel"].value_counts().reindex(SEN_ORDER).dropna().reset_index()
-        sc.columns = ["level", "count"]
-        fig = px.bar(sc, x="level", y="count", text="count",
-                     color="level",
-                     color_discrete_sequence=["#93C5FD","#60A5FA","#3B82F6","#2563EB","#1D4ED8"])
-        fig.update_traces(textposition="outside", marker_line_width=0, showlegend=False)
-        fig.update_layout(xaxis_title="", yaxis_title="Loker", **make_layout(255))
-        apply_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        if not df_sen.empty:
+            sc = df_sen["seniorityLevel"].value_counts().reindex(SEN_ORDER).dropna().reset_index()
+            sc.columns = ["level", "count"]
+            fig = px.bar(sc, x="level", y="count", text="count",
+                         color="level",
+                         color_discrete_sequence=["#93C5FD","#60A5FA","#3B82F6","#2563EB","#1D4ED8"])
+            fig.update_traces(textposition="outside", marker_line_width=0, showlegend=False,
+                               hovertemplate="<b>Level: %{x}</b><br>Lowongan: %{y}<extra></extra>")
+            fig.update_layout(xaxis_title="", yaxis_title="Jumlah Lowongan", **make_layout(255))
+            apply_axes(fig)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Tidak ada data tingkat senioritas pada filter aktif.")
 
     with cr:
-        st.subheader("Remote Work — Top 10 Role")
+        st.subheader("🏠 Tingkat Remote Work — Top 10 Role")
         df_rm = df.dropna(subset=["workRemoteAllowed"]).copy()
-        df_rm["is_remote"] = df_rm["workRemoteAllowed"].astype(float).astype(bool)
-        rr = (df_rm.groupby("role_label")
-              .agg(total=("is_remote", "count"), remote=("is_remote", "sum"))
-              .assign(pct=lambda x: (x.remote / x.total * 100).round(1))
-              .nlargest(10, "pct").reset_index())
-        avg_r = df_rm["is_remote"].mean() * 100
-        fig = px.bar(rr, x="pct", y="role_label", orientation="h", text="pct",
-                     color="pct", color_continuous_scale="Greens")
-        fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside",
-                          marker_line_width=0)
-        fig.update_coloraxes(showscale=False)
-        fig.add_vline(x=avg_r, line_dash="dash", line_color=AMBER,
-                      annotation_text=f"Avg {avg_r:.1f}%",
-                      annotation_position="top right",
-                      annotation_font_color=AMBER)
-        fig.update_layout(yaxis_categoryorder="total ascending",
-                          xaxis_title="% Remote", yaxis_title="",
-                          **make_layout(255))
-        apply_axes(fig)
-        st.plotly_chart(fig, use_container_width=True)
+        if not df_rm.empty:
+            df_rm["is_remote"] = df_rm["workRemoteAllowed"].astype(float).astype(bool)
+            rr = (df_rm.groupby("role_label")
+                  .agg(total=("is_remote", "count"), remote=("is_remote", "sum"))
+                  .assign(pct=lambda x: (x.remote / x.total * 100).round(1))
+                  .nlargest(10, "pct").reset_index())
+            avg_r = df_rm["is_remote"].mean() * 100
+            
+            fig = hbar(rr, "pct", "role_label", color_scale="Greens", height=255, x_label="Persentase Remote (%)")
+            fig.add_vline(x=avg_r, line_dash="dash", line_color=AMBER,
+                          annotation_text=f"Rata-rata Global {avg_r:.1f}%",
+                          annotation_position="top right",
+                          annotation_font_color=AMBER)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Tidak ada data remote work yang cocok dengan filter.")
 
 
 # ─────────────────────────────────────────────────────────────────
 # PAGE: SKILL DEMAND
 # ─────────────────────────────────────────────────────────────────
 elif page == "Skill Demand":
-    st.title("Skill Demand — Pasar Kerja IT")
-    st.caption("Skill teknis yang paling banyak dicari berdasarkan lowongan kerja LinkedIn Indonesia")
+    page_header(
+        "Kebutuhan Keterampilan Kerja IT", 
+        "Analisis mendalam terhadap keahlian teknis terpenting yang dicari oleh rekruter di pasar kerja Indonesia.",
+        "🛠️"
+    )
 
-    tab1, tab2, tab3 = st.tabs(["Top Skills Global", "Skills per Role", "Heatmap"])
+    tab1, tab2, tab3 = st.tabs(["Top Keterampilan Global", "Kebutuhan per Peran (Role)", "Peta Hubungan (Heatmap)"])
 
     with tab1:
         r1, r2 = st.columns([1, 3], gap="medium")
         with r1:
-            top_n  = st.slider("Top N Skills", 10, 50, 25)
-            yr_sel = st.multiselect("Tahun", [2022, 2023, 2024, 2025, 2026],
-                                    default=[2022, 2023, 2024, 2025, 2026])
-        dff   = df[df["year"].isin(yr_sel)] if yr_sel else df
+            st.markdown("#### Parameter Analisis")
+            top_n  = st.slider("Jumlah Top Keterampilan", 10, 50, 25, help="Tentukan berapa banyak keterampilan teratas yang ingin divisualisasikan")
+            yr_sel = st.multiselect("Pilih Tahun Posting Loker", [2022, 2023, 2024, 2025, 2026],
+                                    default=[2022, 2023, 2024, 2025, 2026], key="sd_year")
+        
+        dff = df[df["year"].isin(yr_sel)] if yr_sel else df
         s_all: list = []
         dff["skills_list"].apply(lambda l: s_all.extend(l))
         ctr_f = Counter(s_all)
         tsk   = pd.DataFrame(ctr_f.most_common(top_n), columns=["skill", "count"])
+        
         with r2:
-            fig = hbar(tsk, "count", "skill", height=max(420, top_n * 22))
+            fig = hbar(tsk, "count", "skill", height=max(420, top_n * 22), title=f"Top {top_n} Keahlian Paling Dicari")
             st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Tren Top 8 Skill per Tahun")
+        st.subheader("📈 Tren Perkembangan Top 8 Keterampilan per Tahun")
         top8 = [s for s, _ in ctr_f.most_common(8)]
         rows = []
         for _, row in df.dropna(subset=["year"]).iterrows():
@@ -504,409 +654,453 @@ elif page == "Skill Demand":
             fig2 = px.line(tgrp, x="Year", y="Count", color="Skill", markers=True,
                            line_shape="spline",
                            color_discrete_sequence=px.colors.qualitative.Plotly)
-            fig2.update_traces(line_width=2.5)
+            fig2.update_traces(line_width=2.5, hovertemplate="<b>%{color}</b><br>Tahun %{x}<br>Lowongan: %{y}<extra></extra>")
             fig2.update_layout(**make_layout(380))
             apply_axes(fig2)
             apply_legend(fig2)
             st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("Pilih filter tahun yang memiliki data untuk melihat tren.")
 
     with tab2:
-        rs  = st.selectbox("Pilih Role IT", sorted(df["role_label"].unique()))
-        ns  = st.slider("Jumlah Skill", 5, 20, 12)
-        dfr = df[df["role_label"] == rs]
-        rs_all: list = []
-        dfr["skills_list"].apply(lambda l: rs_all.extend(l))
-        rctr  = Counter(rs_all)
-        tprol = pd.DataFrame(rctr.most_common(ns), columns=["skill", "count"])
+        if not df.empty:
+            role_options = sorted(df["role_label"].dropna().unique())
+            rs  = st.selectbox("Pilih Peran Pekerjaan (Role)", role_options, key="sd_role")
+            ns  = st.slider("Jumlah Keterampilan Ditampilkan", 5, 25, 12, key="sd_skill_count")
+            
+            dfr = df[df["role_label"] == rs]
+            rs_all: list = []
+            dfr["skills_list"].apply(lambda l: rs_all.extend(l))
+            rctr  = Counter(rs_all)
+            tprol = pd.DataFrame(rctr.most_common(ns), columns=["skill", "count"])
 
-        c1, c2 = st.columns([2, 1], gap="medium")
-        with c1:
-            if not tprol.empty:
-                fig = hbar(tprol, "count", "skill", height=max(320, ns * 36),
-                           title=f"Top {ns} Skill — {rs} ({len(dfr):,} loker)")
-                st.plotly_chart(fig, use_container_width=True)
-        with c2:
-            st.markdown(f"**Profil: {rs}**")
-            st.metric("Total Loker",     f"{len(dfr):,}")
-            st.metric("Avg Skill/Loker", f"{dfr['skill_count'].mean():.1f}")
-            st.metric("Remote Work",
-                      f"{dfr['workRemoteAllowed'].fillna(0).astype(float).mean() * 100:.1f}%")
-            st.metric("Avg Pelamar",     f"{dfr['applicantsCount'].mean():.0f}")
-            st.markdown("**Skill utama:**")
-            for s, c in rctr.most_common(5):
-                pct = c / len(dfr) * 100
-                st.markdown(
-                    f"<span class='chip chip-blue'>{s}&nbsp;{pct:.0f}%</span>",
-                    unsafe_allow_html=True)
+            c1, c2 = st.columns([2, 1], gap="medium")
+            with c1:
+                if not tprol.empty:
+                    fig = hbar(tprol, "count", "skill", height=max(320, ns * 36),
+                               title=f"Top {ns} Keterampilan Terpenting untuk {rs} ({len(dfr):,} Loker)")
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Data keterampilan untuk role ini tidak tersedia.")
+            with c2:
+                st.markdown(f"### 📋 Profil Karir: {rs}")
+                
+                # Dynamic Custom Centered KPI Card Stack
+                st.markdown(kpi_card("Total Loker Terdeteksi", f"{len(dfr):,}", "💼"), unsafe_allow_html=True)
+                
+                avg_sk = dfr['skill_count'].mean() if not dfr.empty else 0
+                st.markdown(kpi_card("Rata-rata Skill/Loker", f"{avg_sk:.1f}", "📊"), unsafe_allow_html=True)
+                
+                remote_pct = dfr['workRemoteAllowed'].fillna(0).astype(float).mean() * 100 if not dfr.empty else 0
+                st.markdown(kpi_card("Toleransi Kerja Remote", f"{remote_pct:.1f}%", "🏠"), unsafe_allow_html=True)
+                
+                avg_appl = dfr['applicantsCount'].mean() if not dfr.empty else 0
+                st.markdown(kpi_card("Rata-rata Pelamar/Loker", f"{avg_appl:.0f}", "👥"), unsafe_allow_html=True)
+
+                st.markdown("<b>5 Kompetensi Paling Kritis:</b>", unsafe_allow_html=True)
+                for s, c in rctr.most_common(5):
+                    pct = c / max(len(dfr), 1) * 100
+                    st.markdown(
+                        f"<span class='chip chip-blue'>{s} &nbsp;({pct:.0f}%)</span>",
+                        unsafe_allow_html=True)
+        else:
+            st.warning("Tidak ada peran pekerjaan yang tersedia di filter saat ini.")
 
     with tab3:
-        st.subheader("Heatmap: % Kemunculan Skill per Role")
-        nh        = st.slider("Jumlah top skill", 10, 30, 20)
-        th_skills = [s for s, _ in j_ctr.most_common(nh)]
-        th_roles  = df["role_label"].value_counts().head(15).index.tolist()
-        hm = {
-            role: {
-                sk: round(
-                    df[df["role_label"] == role]["skills_list"]
-                    .apply(lambda l: sk in l).sum()
-                    / max(len(df[df["role_label"] == role]), 1) * 100, 1)
-                for sk in th_skills
+        st.subheader("🗺️ Peta Hubungan Keterampilan Terpopuler per Peran IT")
+        st.caption("Visualisasi sebaran intensitas kemunculan (%) skill di berbagai role IT utama.")
+        
+        nh = st.slider("Tampilkan Top N Keterampilan", 10, 30, 20, key="sd_heatmap_count")
+        
+        top_roles = df["role_label"].value_counts().head(12).index.tolist()
+        top_skills = [s for s, _ in j_ctr.most_common(nh)]
+        
+        if top_roles and top_skills:
+            hm = {
+                role: {
+                    sk: round(
+                        df[df["role_label"] == role]["skills_list"]
+                        .apply(lambda l: sk in l).sum()
+                        / max(len(df[df["role_label"] == role]), 1) * 100, 1)
+                    for sk in top_skills
+                }
+                for role in top_roles
             }
-            for role in th_roles
-        }
-        hm_df = pd.DataFrame(hm).T
-        fig = px.imshow(hm_df, color_continuous_scale="Blues",
-                        aspect="auto", text_auto=".0f")
-        fig.update_layout(coloraxis_colorbar_title="%",
-                          coloraxis_colorbar_tickfont_color=TEXT,
-                          **make_layout(520))
-        fig.update_xaxes(tickangle=-40, color=MUTED)
-        fig.update_yaxes(color=MUTED)
-        st.plotly_chart(fig, use_container_width=True)
+            hm_df = pd.DataFrame(hm).T
+            
+            fig = px.imshow(hm_df, color_continuous_scale="Blues", aspect="auto", text_auto=".0f")
+            fig.update_layout(coloraxis_colorbar_title="Kemunculan (%)",
+                              coloraxis_colorbar_tickfont_color=TEXT,
+                              **make_layout(520))
+            fig.update_xaxes(tickangle=-40, color=MUTED)
+            fig.update_yaxes(color=MUTED)
+            fig.update_traces(hovertemplate="Role: %{y}<br>Skill: %{x}<br>Kemunculan: %{z}%<extra></extra>")
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Pilih role dan tahun yang memiliki cakupan data lebih luas.")
 
 
 # ─────────────────────────────────────────────────────────────────
 # PAGE: HIRING TRENDS
 # ─────────────────────────────────────────────────────────────────
 elif page == "Hiring Trends":
-    st.title("Hiring Trends")
-    st.caption("Tren perekrutan, kompetisi, seniority, dan remote work di IT Indonesia")
+    page_header(
+        "Tren Perekrutan & Karakteristik Lowongan",
+        "Meninjau tingkat kompetisi antar pelamar, preferensi jenis kerja remote, hingga tuntutan profil senioritas.",
+        "📈"
+    )
 
-    tab1, tab2, tab3 = st.tabs(["Kompetisi", "Remote Work", "Seniority & Employment"])
+    tab1, tab2, tab3 = st.tabs(["Kompetisi & Minat", "Kerja Remote (Adopsi)", "Senioritas & Jenis Kontrak"])
 
     with tab1:
-        st.subheader("Kompetisi per Role — Rata-rata Jumlah Pelamar")
-        comp = (df.groupby("role_label")
-                .agg(avg_applicants=("applicantsCount", "mean"),
-                     total_jobs=("role_label", "count"))
-                .round(1).sort_values("avg_applicants", ascending=False).reset_index())
-        c1, c2 = st.columns([3, 2], gap="medium")
-        with c1:
-            fig = px.bar(comp, x="avg_applicants", y="role_label", orientation="h",
-                         text="avg_applicants", color="avg_applicants",
-                         color_continuous_scale="RdYlGn_r")
-            fig.update_traces(texttemplate="%{text:.0f}", textposition="outside",
-                              marker_line_width=0)
-            fig.update_coloraxes(showscale=False)
-            fig.update_layout(yaxis_categoryorder="total ascending",
-                              xaxis_title="Rata-rata Pelamar", yaxis_title="",
-                              **make_layout(620))
-            apply_axes(fig)
-            st.plotly_chart(fig, use_container_width=True)
-        with c2:
-            fig2 = px.scatter(comp, x="total_jobs", y="avg_applicants",
-                              size="total_jobs", color="avg_applicants",
-                              color_continuous_scale="RdYlGn_r", text="role_label",
-                              title="Jumlah Loker vs Kompetisi")
-            fig2.update_traces(textposition="top center", textfont_size=9,
-                               textfont_color=TEXT)
-            fig2.update_coloraxes(showscale=False)
-            fig2.update_layout(xaxis_title="Total Loker", yaxis_title="Avg Pelamar",
-                               **make_layout(620))
-            apply_axes(fig2)
-            st.plotly_chart(fig2, use_container_width=True)
+        st.subheader("👥 Analisis Persaingan Pelamar per Peran IT")
+        st.caption("Membandingkan rata-rata jumlah pelamar per posting pekerjaan pada tiap-tiap role IT.")
+        
+        if not df.empty:
+            comp = (df.groupby("role_label")
+                    .agg(avg_applicants=("applicantsCount", "mean"),
+                         total_jobs=("role_label", "count"))
+                    .round(1).sort_values("avg_applicants", ascending=False).reset_index())
+            
+            c1, c2 = st.columns([3, 2], gap="medium")
+            with c1:
+                fig = px.bar(comp, x="avg_applicants", y="role_label", orientation="h",
+                             text="avg_applicants", color="avg_applicants",
+                             color_continuous_scale="RdYlGn_r")
+                fig.update_traces(texttemplate="%{text:.0f}", textposition="outside",
+                                  marker_line_width=0,
+                                  hovertemplate="<b>%{y}</b><br>Rata-rata Pelamar: %{x}<extra></extra>")
+                fig.update_coloraxes(showscale=False)
+                fig.update_layout(yaxis_categoryorder="total ascending",
+                                  xaxis_title="Rata-rata Pelamar per Loker", yaxis_title="",
+                                  **make_layout(620))
+                apply_axes(fig)
+                st.plotly_chart(fig, use_container_width=True)
+            with c2:
+                fig2 = px.scatter(comp, x="total_jobs", y="avg_applicants",
+                                  size="total_jobs", color="avg_applicants",
+                                  color_continuous_scale="RdYlGn_r", text="role_label",
+                                  title="Pemetaan Volume Lowongan vs Keketatan Pelamar")
+                fig2.update_traces(textposition="top center", textfont_size=9,
+                                   textfont_color=TEXT,
+                                   hovertemplate="<b>%{text}</b><br>Jumlah Lowongan: %{x}<br>Rata-rata Pelamar: %{y:.0f}<extra></extra>")
+                fig2.update_coloraxes(showscale=False)
+                fig2.update_layout(xaxis_title="Total Loker", yaxis_title="Avg Pelamar per Loker",
+                                   **make_layout(620))
+                apply_axes(fig2)
+                st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.warning("Tidak ada data untuk memetakan tingkat kompetisi.")
 
     with tab2:
-        st.subheader("Adopsi Remote Work per Role IT")
+        st.subheader("🏠 Porsi Penerapan Model Kerja Remote")
+        
         df_rm = df.dropna(subset=["workRemoteAllowed"]).copy()
-        df_rm["is_remote"] = df_rm["workRemoteAllowed"].astype(float).astype(bool)
-        rr2 = (df_rm.groupby("role_label")
-               .agg(total=("is_remote", "count"), remote=("is_remote", "sum"))
-               .assign(pct=lambda x: (x.remote / x.total * 100).round(1))
-               .sort_values("pct", ascending=False).reset_index())
-        avg_r = df_rm["is_remote"].mean() * 100
-        c1, c2 = st.columns([3, 2], gap="medium")
-        with c1:
-            fig = px.bar(rr2, x="pct", y="role_label", orientation="h", text="pct",
-                         color="pct", color_continuous_scale="Greens")
-            fig.update_traces(texttemplate="%{text:.1f}%", textposition="outside",
-                              marker_line_width=0)
-            fig.update_coloraxes(showscale=False)
-            fig.add_vline(x=avg_r, line_dash="dash", line_color=AMBER,
-                          annotation_text=f"Avg {avg_r:.1f}%",
-                          annotation_font_color=AMBER)
-            fig.update_layout(yaxis_categoryorder="total ascending",
-                              xaxis_title="% Remote", yaxis_title="",
-                              **make_layout(560))
-            apply_axes(fig)
-            st.plotly_chart(fig, use_container_width=True)
-        with c2:
-            yes_r = df_rm["is_remote"].sum(); no_r = (~df_rm["is_remote"]).sum()
-            fig2 = px.pie(values=[yes_r, no_r], names=["Remote", "On-site"], hole=0.55,
-                          color_discrete_sequence=[GREEN, BORDER])
-            fig2.update_traces(textposition="inside", textinfo="percent+label",
-                               textfont_size=12, textfont_color=TEXT)
-            fig2.update_layout(showlegend=False, **make_layout(270))
-            st.plotly_chart(fig2, use_container_width=True)
-            st.metric("Rata-rata Remote",       f"{avg_r:.1f}%")
-            st.metric("Paling Remote-friendly", rr2.iloc[0]["role_label"])
+        if not df_rm.empty:
+            df_rm["is_remote"] = df_rm["workRemoteAllowed"].astype(float).astype(bool)
+            rr2 = (df_rm.groupby("role_label")
+                   .agg(total=("is_remote", "count"), remote=("is_remote", "sum"))
+                   .assign(pct=lambda x: (x.remote / x.total * 100).round(1))
+                   .sort_values("pct", ascending=False).reset_index())
+            avg_r = df_rm["is_remote"].mean() * 100
+            
+            c1, c2 = st.columns([3, 2], gap="medium")
+            with c1:
+                fig = hbar(rr2, "pct", "role_label", color_scale="Greens", height=560, x_label="Adopsi Kerja Remote (%)")
+                fig.add_vline(x=avg_r, line_dash="dash", line_color=AMBER,
+                              annotation_text=f"Rata-rata Pasar {avg_r:.1f}%",
+                              annotation_font_color=AMBER)
+                st.plotly_chart(fig, use_container_width=True)
+            with c2:
+                yes_r = df_rm["is_remote"].sum(); no_r = (~df_rm["is_remote"]).sum()
+                fig2 = px.pie(values=[yes_r, no_r], names=["Mendukung Remote", "On-site / Hybrid"], hole=0.55,
+                              color_discrete_sequence=[GREEN, BORDER])
+                fig2.update_traces(textposition="inside", textinfo="percent+label",
+                                   textfont_size=12, textfont_color=TEXT,
+                                   hovertemplate="<b>%{label}</b><br>Loker: %{value} (%{percent})<extra></extra>")
+                fig2.update_layout(showlegend=False, **make_layout(270))
+                st.plotly_chart(fig2, use_container_width=True)
+                
+                st.markdown(kpi_card("Rerata Adopsi Remote", f"{avg_r:.1f}%", "🏠"), unsafe_allow_html=True)
+                if not rr2.empty:
+                    st.markdown(kpi_card("Role Paling Terbuka", f"{rr2.iloc[0]['role_label']}", "🌟"), unsafe_allow_html=True)
+        else:
+            st.info("Pilih filter tahun/role lain yang merekam data workRemoteAllowed.")
 
     with tab3:
-        st.subheader("Distribusi Seniority Level")
+        st.subheader("🎓 Klasifikasi Pengalaman Kerja & Jenis Kontrak")
         df_sen = df[df["seniorityLevel"].isin(SEN_ORDER)].copy()
+        
         c1, c2 = st.columns(2, gap="medium")
         with c1:
-            sc = df_sen["seniorityLevel"].value_counts().reset_index()
-            sc.columns = ["level", "count"]
-            fig = px.pie(sc, values="count", names="level", hole=0.5,
-                         color_discrete_sequence=px.colors.qualitative.Pastel)
-            fig.update_traces(textposition="inside", textinfo="percent+label",
-                              textfont_size=11)
-            fig.update_layout(**make_layout(300))
-            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("#### Distribusi Tingkat Senioritas")
+            if not df_sen.empty:
+                sc = df_sen["seniorityLevel"].value_counts().reset_index()
+                sc.columns = ["level", "count"]
+                fig = px.pie(sc, values="count", names="level", hole=0.5,
+                             color_discrete_sequence=px.colors.qualitative.Pastel)
+                fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=11,
+                                   hovertemplate="<b>%{label}</b><br>Jumlah: %{value} (%{percent})<extra></extra>")
+                fig.update_layout(**make_layout(300))
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Tidak ada data senioritas pada filter aktif.")
         with c2:
-            sr   = df_sen.groupby(["role_label", "seniorityLevel"]).size().unstack(fill_value=0)
-            sp   = sr.div(sr.sum(axis=1), axis=0) * 100
-            top8 = df["role_label"].value_counts().head(8).index
-            sp   = sp.reindex(top8)
-            ex   = [c for c in SEN_ORDER if c in sp.columns]
-            fig2 = px.bar(sp[ex].reset_index(), y="role_label", x=ex,
-                          barmode="stack", orientation="h",
-                          color_discrete_sequence=px.colors.qualitative.Pastel)
-            fig2.update_layout(xaxis_title="%", yaxis_title="", legend_title="Level",
-                               **make_layout(300))
-            apply_axes(fig2)
-            apply_legend(fig2)
-            st.plotly_chart(fig2, use_container_width=True)
+            st.markdown("#### Proporsi Senioritas per Role Utama (Top 8)")
+            if not df_sen.empty:
+                sr   = df_sen.groupby(["role_label", "seniorityLevel"]).size().unstack(fill_value=0)
+                sp   = sr.div(sr.sum(axis=1), axis=0) * 100
+                top8 = df["role_label"].value_counts().head(8).index
+                sp   = sp.reindex(top8)
+                ex   = [c for c in SEN_ORDER if c in sp.columns]
+                fig2 = px.bar(sp[ex].reset_index(), y="role_label", x=ex,
+                              barmode="stack", orientation="h",
+                              color_discrete_sequence=px.colors.qualitative.Pastel)
+                fig2.update_layout(xaxis_title="Persentase Komposisi (%)", yaxis_title="", legend_title="Level",
+                                   **make_layout(300))
+                fig2.update_traces(hovertemplate="Role: %{y}<br>Komposisi: %{x:.1f}%<extra></extra>")
+                apply_axes(fig2)
+                apply_legend(fig2)
+                st.plotly_chart(fig2, use_container_width=True)
+            else:
+                st.info("Data role senioritas tidak ditemukan.")
 
-        st.subheader("Employment Type")
+        st.subheader("👔 Pola Perekrutan Berdasarkan Jenis Kemitraan")
         c1, c2 = st.columns(2, gap="medium")
         with c1:
-            em = df["employmentType"].value_counts().reset_index()
-            em.columns = ["type", "count"]
-            fig = px.pie(em, values="count", names="type", hole=0.5,
-                         color_discrete_sequence=px.colors.qualitative.Pastel)
-            fig.update_traces(textposition="inside", textinfo="percent+label",
-                              textfont_size=11)
-            fig.update_layout(showlegend=False, **make_layout(270))
-            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("#### Struktur Global Employment Type")
+            if not df.empty:
+                em = df["employmentType"].value_counts().reset_index()
+                em.columns = ["type", "count"]
+                fig = px.pie(em, values="count", names="type", hole=0.5,
+                             color_discrete_sequence=px.colors.qualitative.Pastel)
+                fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=11,
+                                   hovertemplate="<b>%{label}</b><br>Jumlah: %{value} (%{percent})<extra></extra>")
+                fig.update_layout(showlegend=False, **make_layout(270))
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("Data jenis kontrak tidak tersedia.")
         with c2:
-            top6 = df["role_label"].value_counts().head(6).index
-            er   = (df[df["role_label"].isin(top6)]
-                    .groupby(["role_label", "employmentType"]).size().unstack(fill_value=0))
-            ep   = er.div(er.sum(axis=1), axis=0) * 100
-            fig2 = px.bar(ep.reset_index(), y="role_label",
-                          x=[c for c in ep.columns], barmode="stack", orientation="h",
-                          color_discrete_sequence=px.colors.qualitative.Pastel)
-            fig2.update_layout(xaxis_title="%", yaxis_title="", legend_title="Tipe",
-                               **make_layout(270))
-            apply_axes(fig2)
-            apply_legend(fig2)
-            st.plotly_chart(fig2, use_container_width=True)
+            st.markdown("#### Proporsi Jenis Kontrak per Role Utama (Top 6)")
+            if not df.empty:
+                top6 = df["role_label"].value_counts().head(6).index
+                er   = (df[df["role_label"].isin(top6)]
+                        .groupby(["role_label", "employmentType"]).size().unstack(fill_value=0))
+                ep   = er.div(er.sum(axis=1), axis=0) * 100
+                fig2 = px.bar(ep.reset_index(), y="role_label",
+                              x=[c for c in ep.columns], barmode="stack", orientation="h",
+                              color_discrete_sequence=px.colors.qualitative.Pastel)
+                fig2.update_layout(xaxis_title="Persentase Komposisi (%)", yaxis_title="", legend_title="Tipe",
+                                   **make_layout(270))
+                fig2.update_traces(hovertemplate="Role: %{y}<br>Komposisi: %{x:.1f}%<extra></extra>")
+                apply_axes(fig2)
+                apply_legend(fig2)
+                st.plotly_chart(fig2, use_container_width=True)
+            else:
+                st.info("Pola jenis kontrak tidak tersedia.")
 
 
 # ─────────────────────────────────────────────────────────────────
 # PAGE: COURSE SUPPLY
 # ─────────────────────────────────────────────────────────────────
 elif page == "Course Supply":
-    st.title("Course Supply — Analisis Coursera")
-    st.caption(
-        "Ketersediaan course untuk menutup kesenjangan skill pasar IT Indonesia. "
-        "Supply dihitung hanya untuk skill yang ada dalam kosakata LinkedIn."
+    page_header(
+        "Ketersediaan Materi Pembelajaran (Course Supply)",
+        "Mengevaluasi program-program peningkatan keterampilan (upskilling) Coursera yang relevan dengan kosakatanya industri.",
+        "🎓"
     )
 
-    tab1, tab2, tab3 = st.tabs(["Overview Course", "Supply vs Demand", "Course per Role"])
+    tab1, tab2, tab3 = st.tabs(["Overview Kursus", "Distribusi Keterampilan Coursera", "Kursus per Peran (Role)"])
 
     with tab1:
+        # Dynamic Custom Centered KPI Card Grid
         k1, k2, k3, k4 = st.columns(4)
-        k1.metric("Total Course",       f"{len(df_c):,}")
-        k2.metric("Role Tercakup",      df_c["role_category"].nunique())
-        k3.metric("Skill LinkedIn\ndi Coursera", f"{len(c_ctr)}")
-        k4.metric("Avg Skill/Course",   f"{df_c['skill_count'].mean():.1f}")
+        k1.markdown(kpi_card("Total Kursus Aktif", f"{len(df_c):,}", "🎓"), unsafe_allow_html=True)
+        k2.markdown(kpi_card("Kategori Peran Tercakup", f"{df_c['role_category'].nunique() if not df_c.empty else 0}", "👤"), unsafe_allow_html=True)
+        k3.markdown(kpi_card("Skill Terkoneksi LinkedIn", f"{len(c_ctr)}", "🛠️"), unsafe_allow_html=True)
+        
+        avg_c_skills = df_c['skill_count'].mean() if not df_c.empty else 0
+        k4.markdown(kpi_card("Avg Skill per Kursus", f"{avg_c_skills:.1f}", "📊"), unsafe_allow_html=True)
+        
         st.divider()
         c1, c2 = st.columns(2, gap="medium")
         with c1:
-            st.subheader("Distribusi Course per Role (Top 15)")
-            cc = df_c["role_category"].value_counts().head(15).reset_index()
-            cc.columns = ["role", "count"]
-            fig = hbar(cc, "count", "role", color_scale="Purples", height=440)
-            st.plotly_chart(fig, use_container_width=True)
+            st.subheader("📚 Top 15 Klasifikasi Peran Kursus di Coursera")
+            if not df_c.empty:
+                cc = df_c["role_category"].value_counts().head(15).reset_index()
+                cc.columns = ["role", "count"]
+                fig = hbar(cc, "count", "role", color_scale="Purples", height=440, x_label="Jumlah Kursus")
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("Tidak ada data program kursus dalam filter yang dipilih.")
         with c2:
-            st.subheader("Tingkat Kesulitan")
-            di = df_c["difficulty"].value_counts().reset_index()
-            di.columns = ["level", "count"]
-            fig2 = px.pie(di, values="count", names="level", hole=0.55,
-                          color_discrete_sequence=[GREEN, BLUE, AMBER, RED])
-            fig2.update_traces(textposition="inside", textinfo="percent+label",
-                               textfont_size=12)
-            fig2.update_layout(**make_layout(200))
-            st.plotly_chart(fig2, use_container_width=True)
+            st.subheader("🌟 Tingkat Kesulitan Pembelajaran")
+            if not df_c.empty:
+                di = df_c["difficulty"].value_counts().reset_index()
+                di.columns = ["level", "count"]
+                fig2 = px.pie(di, values="count", names="level", hole=0.55,
+                              color_discrete_sequence=[GREEN, BLUE, AMBER, RED])
+                fig2.update_traces(textposition="inside", textinfo="percent+label", textfont_size=12,
+                                   hovertemplate="<b>Kesulitan: %{label}</b><br>Kursus: %{value} (%{percent})<extra></extra>")
+                fig2.update_layout(**make_layout(200))
+                st.plotly_chart(fig2, use_container_width=True)
+            else:
+                st.info("Data tingkat kesulitan tidak tersedia.")
 
-            st.subheader("Durasi Course")
-            du = df_c["duration"].value_counts().reset_index()
-            du.columns = ["durasi", "count"]
-            du["durasi"] = du["durasi"].str.replace("_", " ").str.title()
-            fig3 = px.bar(du, x="durasi", y="count", text="count",
-                          color="count", color_continuous_scale="Blues")
-            fig3.update_traces(textposition="outside", marker_line_width=0)
-            fig3.update_coloraxes(showscale=False)
-            fig3.update_layout(xaxis_tickangle=-30, xaxis_title="", yaxis_title="Jumlah",
-                               **make_layout(200))
-            apply_axes(fig3)
-            st.plotly_chart(fig3, use_container_width=True)
+            st.subheader("⏱️ Rentang Durasi Kursus")
+            if not df_c.empty:
+                du = df_c["duration"].value_counts().reset_index()
+                du.columns = ["durasi", "count"]
+                du["durasi"] = du["durasi"].str.replace("_", " ").str.title()
+                fig3 = px.bar(du, x="durasi", y="count", text="count",
+                              color="count", color_continuous_scale="Blues")
+                fig3.update_traces(textposition="outside", marker_line_width=0,
+                                   hovertemplate="<b>Durasi: %{x}</b><br>Jumlah: %{y}<extra></extra>")
+                fig3.update_coloraxes(showscale=False)
+                fig3.update_layout(xaxis_tickangle=-30, xaxis_title="", yaxis_title="Jumlah Kursus",
+                                   **make_layout(200))
+                apply_axes(fig3)
+                st.plotly_chart(fig3, use_container_width=True)
+            else:
+                st.info("Data durasi kursus tidak tersedia.")
 
     with tab2:
-        st.subheader("Skill Supply vs Demand")
-        st.info(
-            "Supply dihitung berdasarkan berapa banyak course Coursera yang mengajarkan "
-            "skill dari kosakata LinkedIn. Skill dengan demand tinggi tapi supply rendah "
-            "adalah prioritas pembelajaran."
-        )
-        TOP_N = st.slider("Jumlah skill top demand", 15, 50, 30)
-        top_d = dict(j_ctr.most_common(TOP_N))
-        gdf = pd.DataFrame([
-            {
-                "skill":   sk,
-                "demand":  dm,
-                "supply":  c_ctr.get(sk, 0),
-                "covered": c_ctr.get(sk, 0) > 0,
-            }
-            for sk, dm in top_d.items()
-        ])
-        gdf_s = gdf.sort_values("demand", ascending=True)
-
-        c1, c2 = st.columns(2, gap="medium")
-        with c1:
-            fig = go.Figure()
-            fig.add_trace(go.Bar(
-                name="Demand (Loker)",
-                y=gdf_s["skill"], x=gdf_s["demand"],
-                orientation="h", marker_color=BLUE, marker_line_width=0,
-            ))
-            fig.add_trace(go.Bar(
-                name="Supply (Coursera)",
-                y=gdf_s["skill"], x=gdf_s["supply"],
-                orientation="h", marker_color=VIOLET, marker_line_width=0,
-            ))
-            fig.update_layout(
-                barmode="group",
-                yaxis_categoryorder="array",
-                yaxis_categoryarray=gdf_s["skill"].tolist(),
-                xaxis_title="Frekuensi", yaxis_title="",
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0,
-                            bgcolor=SURFACE, bordercolor=BORDER, font_color=TEXT),
-                **make_layout(max(500, TOP_N * 25)),
+        st.subheader("🎓 Distribusi Keterampilan yang Diajarkan Coursera")
+        st.caption("Analisis kompetensi yang paling sering dibahas dalam katalog pembelajaran Coursera")
+        
+        # Calculate skill counts from filtered Coursera dataset
+        all_c_skills = []
+        df_c["skills_list"].apply(lambda l: all_c_skills.extend(l))
+        c_skill_counts = Counter(all_c_skills)
+        
+        if all_c_skills:
+            top_n_c_skills = st.slider("Tampilkan Top N Skill Coursera", 10, 50, 20, key="cs_top_skills")
+            df_top_c = pd.DataFrame(c_skill_counts.most_common(top_n_c_skills), columns=["Skill", "Jumlah Kursus"])
+            
+            fig_c_dist = hbar(
+                df_top_c, "Jumlah Kursus", "Skill", 
+                color_scale="Purples", height=max(400, top_n_c_skills * 25),
+                title=f"Top {top_n_c_skills} Keterampilan Terpopuler yang Diajarkan di Coursera",
+                x_label="Jumlah Kursus yang Mengajarkan"
             )
-            apply_axes(fig)
-            st.plotly_chart(fig, use_container_width=True)
-
-        with c2:
-            st.subheader("Skill Belum Tercakup (Top 15)")
-            st.caption("Skill demand tinggi namun belum ada di Coursera")
-            nc = gdf[~gdf["covered"]].sort_values("demand", ascending=False).head(15)
-            fig2 = px.bar(nc, x="demand", y="skill", orientation="h",
-                          text="demand", color="demand", color_continuous_scale="Reds")
-            fig2.update_traces(textposition="outside", marker_line_width=0)
-            fig2.update_coloraxes(showscale=False)
-            fig2.update_layout(yaxis_categoryorder="total ascending",
-                               xaxis_title="Demand (Frekuensi Loker)", yaxis_title="",
-                               **make_layout(max(380, 15 * 28)))
-            apply_axes(fig2)
-            st.plotly_chart(fig2, use_container_width=True)
-
-        st.divider()
-        st.subheader("Kategorisasi Skill")
-        cov_df = gdf[gdf["covered"]].sort_values("demand", ascending=False)
-        not_df = gdf[~gdf["covered"]].sort_values("demand", ascending=False)
-        ca2, cb2 = st.columns(2, gap="medium")
-        with ca2:
-            st.markdown(f"**Tercakup di Coursera** ({len(cov_df)} skill)")
-            for _, row in cov_df.iterrows():
-                st.markdown(f"<span class='chip chip-green'>{row['skill']}</span>",
-                            unsafe_allow_html=True)
-        with cb2:
-            st.markdown(f"**Belum Tercakup** ({len(not_df)} skill)")
-            for _, row in not_df.iterrows():
-                st.markdown(f"<span class='chip chip-red'>{row['skill']}</span>",
-                            unsafe_allow_html=True)
+            st.plotly_chart(fig_c_dist, use_container_width=True)
+            
+            st.markdown("#### ✨ Kumpulan Keterampilan Utama di Coursera")
+            st.caption("Kompetensi paling berlimpah berdasarkan frekuensi sebaran materi ajar.")
+            
+            col_chips_1, col_chips_2 = st.columns(2)
+            with col_chips_1:
+                st.markdown("**Peringkat 1-10:**")
+                for _, row in df_top_c.head(10).iterrows():
+                    st.markdown(f"<span class='chip chip-green'>{row['Skill']} ({row['Jumlah Kursus']} kursus)</span>", unsafe_allow_html=True)
+            with col_chips_2:
+                st.markdown("**Peringkat 11-20:**")
+                if len(df_top_c) > 10:
+                    for _, row in df_top_c.iloc[10:min(20, len(df_top_c))].iterrows():
+                        st.markdown(f"<span class='chip chip-blue'>{row['Skill']} ({row['Jumlah Kursus']} kursus)</span>", unsafe_allow_html=True)
+        else:
+            st.warning("Tidak ada data keterampilan untuk filter yang dipilih.")
 
     with tab3:
-        st.subheader("Course Tersedia per Role IT")
-        rs3   = st.selectbox("Pilih Role", sorted(df["role_label"].unique()), key="cs_role")
+        st.subheader("🔍 Temukan Kursus Sesuai Kebutuhan Peran IT")
+        
+        rs3 = st.selectbox("Pilih Peran Pekerjaan (Role)", sorted(df_raw["role_label"].dropna().unique()), key="cs_role")
+        
+        # Map selected role to courses using category match
         df_cr = df_c[df_c["role_category"] == rs3]
         if df_cr.empty:
-            df_cr = df_c[df_c["role_category"].str.contains(
-                rs3.split()[0], case=False, na=False)]
+            df_cr = df_c[df_c["role_category"].str.contains(rs3.split()[0], case=False, na=False)]
 
         c1, c2 = st.columns([2, 1], gap="medium")
         with c1:
             if not df_cr.empty:
-                st.success(f"Ditemukan **{len(df_cr)} course** untuk role **{rs3}**")
+                st.success(f"Ditemukan **{len(df_cr)} kursus** peningkatan keterampilan untuk role **{rs3}**")
+                
+                # Show top 15 matches to keep view high-performance
                 for _, row in df_cr.head(15).iterrows():
                     diff_col = {
                         "BEGINNER": GREEN, "INTERMEDIATE": AMBER,
                         "ADVANCED": RED,   "MIXED": BLUE,
                     }.get(str(row.get("difficulty", "")), MUTED)
+                    
                     dur_str = str(row.get("duration", "")).replace("_", " ").title()
-                    skp  = row["skills_list"][:6]
-                    more = f" +{len(row['skills_list']) - 6} lainnya" \
-                           if len(row["skills_list"]) > 6 else ""
+                    skp = row["skills_list"][:6]
+                    more = f" +{len(row['skills_list']) - 6} lainnya" if len(row["skills_list"]) > 6 else ""
+                    
                     st.markdown(f"""
                     <div class="qlop-card">
                         <div style="font-size:14px;font-weight:700;">
                             <a href="{row['url']}" target="_blank"
-                               style="color:{BLUE};text-decoration:none;">
-                                {row['name']}
+                               style="color:{BLUE};text-decoration:none;hover:underline;">
+                                📖 {row['name']}
                             </a>
                         </div>
-                        <div style="font-size:12px;color:{MUTED};margin:4px 0;">
-                            {row['partner']} &nbsp;·&nbsp;
-                            <span style="color:{diff_col};font-weight:600;">
+                        <div style="font-size:12px;color:{MUTED};margin:6px 0;">
+                            <b>Provider:</b> {row['partner']} &nbsp;·&nbsp;
+                            <span style="color:{diff_col};font-weight:700;">
                                 {row.get('difficulty', '')}
                             </span>
-                            &nbsp;·&nbsp; {dur_str}
+                            &nbsp;·&nbsp; ⏰ {dur_str}
                         </div>
-                        <div style="font-size:12px;color:{TEXT};">
-                            {", ".join(skp)}{more}
+                        <div style="font-size:12px;color:{TEXT};background:rgba(255,255,255,0.03);padding:6px;border-radius:6px;border:1px solid {BORDER}">
+                            <b>Fokus Keahlian:</b> {", ".join(skp)}{more}
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
             else:
-                st.warning(f"Belum ada course yang ter-mapping ke role '{rs3}'.")
+                st.warning(f"Belum ada kursus di Coursera yang ter-mapping secara pas untuk role '{rs3}' dengan filter saat ini.")
 
         with c2:
-            j_rs: list = []
-            df[df["role_label"] == rs3]["skills_list"].apply(lambda l: j_rs.extend(l))
-            jrc   = Counter(j_rs)
-            top_j = set(s for s, _ in jrc.most_common(10))
-
-            c_rs: list = []
-            df_cr["skills_list"].apply(lambda l: c_rs.extend(l))
-            crc   = Counter(c_rs)
-            top_c = set(s for s, _ in crc.most_common(50)) & linkedin_vocab
-
-            cov = top_j & top_c
-            unc = top_j - top_c
-            cov_pct = len(cov) / max(len(top_j), 1) * 100
-
-            st.markdown(f"**Skill Coverage — {rs3}**")
-            st.metric("Skill terlayani (top 10)", f"{len(cov)} / {len(top_j)}")
-            st.progress(cov_pct / 100, text=f"Coverage {cov_pct:.0f}%")
-            if cov:
-                st.markdown("**Tercakup:**")
-                for s in sorted(cov):
-                    st.markdown(f"<span class='chip chip-green'>{s}</span>",
-                                unsafe_allow_html=True)
-            if unc:
-                st.markdown("**Belum tercakup:**")
-                for s in sorted(unc):
-                    st.markdown(f"<span class='chip chip-red'>{s}</span>",
-                                unsafe_allow_html=True)
+            st.markdown(f"### 📊 Ringkasan Pembelajaran — {rs3}")
+            
+            if not df_cr.empty:
+                st.markdown(kpi_card("Program Tersedia", f"{len(df_cr)} Kursus", "🎓"), unsafe_allow_html=True)
+                
+                # Pie Chart showing Course Difficulty Breakdown for this Role
+                st.markdown("<div style='margin-top: 15px; margin-bottom: 5px; font-weight:600;'>Komposisi Tingkat Kesulitan:</div>", unsafe_allow_html=True)
+                diff_counts = df_cr["difficulty"].value_counts().reset_index()
+                diff_counts.columns = ["Difficulty", "Count"]
+                
+                fig_diff = px.pie(
+                    diff_counts, values="Count", names="Difficulty", hole=0.55,
+                    color="Difficulty",
+                    color_discrete_map={
+                        "BEGINNER": GREEN, "INTERMEDIATE": AMBER,
+                        "ADVANCED": RED, "MIXED": BLUE
+                    }
+                )
+                fig_diff.update_traces(textposition="inside", textinfo="percent",
+                                       hovertemplate="<b>Level: %{label}</b><br>Jumlah: %{value} kursus<extra></extra>")
+                fig_diff.update_layout(showlegend=True, **make_layout(180))
+                st.plotly_chart(fig_diff, use_container_width=True)
+                
+                # List Top skills taught in these filtered courses
+                st.markdown("<div style='margin-top: 15px; margin-bottom: 5px; font-weight:600;'>Keterampilan yang Dominan Diajarkan:</div>", unsafe_allow_html=True)
+                c_skills = []
+                df_cr["skills_list"].apply(lambda l: c_skills.extend(l))
+                c_skills_ctr = Counter(c_skills)
+                
+                for s, count in c_skills_ctr.most_common(10):
+                    st.markdown(f"<span class='chip chip-blue'>{s} &nbsp;({count} kursus)</span>", unsafe_allow_html=True)
+            else:
+                st.info("Pilih role lain atau sesuaikan filter platform/kesulitan Anda di sidebar.")
 
 
 # ─────────────────────────────────────────────────────────────────
 # PAGE: A/B TESTING
 # ─────────────────────────────────────────────────────────────────
 elif page == "A/B Testing":
-    st.title("A/B Testing — Strategi Rekomendasi Role")
-    st.caption(
-        "Eksperimen validasi: Top-3 Heuristik vs Cosine Similarity "
-        "untuk mapping skill CV ke role IT (konteks AI Engine QLOP)"
+    page_header(
+        "Validasi Eksperimen Algoritma (A/B Testing)",
+        "Membandingkan efektivitas strategi penataan model mapping rekomendasi karir berbasis kurikulum.",
+        "🔬"
     )
+    
     st.info(
-        "**H₀:** Tidak ada perbedaan signifikan  ·  "
-        "**H₁:** Strategi B lebih akurat  ·  "
-        "**α = 0.05**  ·  Metrik: Precision@1  ·  N = 20% test set"
+        "**Hipotesis Pengujian:**  \n"
+        "**H₀ (Null Hypothesis):** Tidak terdapat perbedaan akurasi yang signifikan antara kedua strategi rekomendasi.  \n"
+        "**H₁ (Alternative Hypothesis):** Strategi B (Cosine Similarity) memiliki tingkat akurasi presisi yang lebih unggul dibanding Strategi A.  \n"
+        "**Tingkat Signifikansi (α):** 0.05  ·  **Metrik Utama:** Precision@1  ·  **Pembagian Sampel:** 20% Data LinkedIn (Test Set)"
     )
 
     @st.cache_data(ttl=7200)
@@ -965,29 +1159,28 @@ elif page == "A/B Testing":
         ])
         return aA, aB, pv, diffs, len(yte)
 
-    with st.spinner("Menjalankan eksperimen A/B..."):
+    with st.spinner("Sedang mengevaluasi performa model di latar belakang..."):
         aA, aB, pv, boot, n_te = run_ab()
 
     ci_lo  = np.percentile(boot, 2.5) * 100
     ci_hi  = np.percentile(boot, 97.5) * 100
     mean_d = boot.mean() * 100
 
+    # Custom Centered KPI Card Grid for A/B metrics
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Strategi A", f"{aA * 100:.2f}%", help="Top-3 Heuristik")
-    k2.metric("Strategi B", f"{aB * 100:.2f}%",
-              delta=f"{(aB - aA) * 100:+.2f}%", help="Cosine Similarity")
-    k3.metric("McNemar p-value", f"{pv:.4f}")
-    k4.metric("Keputusan",
-              "Tolak H₀" if pv < 0.05 else "Gagal Tolak H₀",
-              delta="Signifikan" if pv < 0.05 else "Tidak Signifikan",
-              delta_color="normal" if pv < 0.05 else "off")
+    k1.markdown(kpi_card("Strategi A (Top-3 Heuristik)", f"{aA * 100:.2f}%", "🧮"), unsafe_allow_html=True)
+    k2.markdown(kpi_card("Strategi B (Cosine Similarity)", f"{aB * 100:.2f}%", "🤖", delta=f"{(aB - aA) * 100:+.2f}%"), unsafe_allow_html=True)
+    k3.markdown(kpi_card("McNemar p-value", f"{pv:.4f}", "📊"), unsafe_allow_html=True)
+    
+    decision = "Tolak H₀ (Signifikan)" if pv < 0.05 else "Gagal Tolak H₀"
+    k4.markdown(kpi_card("Keputusan Statistik", decision, "🔬"), unsafe_allow_html=True)
 
     st.divider()
     c1, c2 = st.columns(2, gap="medium")
     with c1:
-        st.subheader("Perbandingan Akurasi")
+        st.subheader("📊 Komparasi Akurasi Pemetaan Precision@1")
         fig = go.Figure(go.Bar(
-            x=["Strategi A\n(Top-3 Heuristik)", "Strategi B\n(Cosine Similarity)"],
+            x=["Strategi A<br>(Top-3 Heuristik)", "Strategi B<br>(Cosine Similarity)"],
             y=[aA * 100, aB * 100],
             text=[f"{aA * 100:.2f}%", f"{aB * 100:.2f}%"],
             textposition="outside",
@@ -999,14 +1192,15 @@ elif page == "A/B Testing":
                           yaxis_title="Precision@1 (%)",
                           **make_layout(330))
         apply_axes(fig)
+        fig.update_traces(hovertemplate="Strategi: %{x}<br>Akurasi: %{y:.2f}%<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
     with c2:
-        st.subheader("Bootstrap Distribution (Selisih B − A)")
+        st.subheader("📊 Distribusi Bootstrap (Selisih Akurasi B − A)")
         fig2 = go.Figure()
         fig2.add_trace(go.Histogram(x=boot * 100, nbinsx=50,
                                     marker_color=BLUE, opacity=0.8))
         fig2.add_vline(x=mean_d, line_dash="dash",  line_color=RED,
-                       annotation_text=f"Mean {mean_d:+.2f}%",
+                       annotation_text=f"Rerata {mean_d:+.2f}%",
                        annotation_font_color=RED)
         fig2.add_vline(x=ci_lo,  line_dash="dot",   line_color=AMBER,
                        annotation_text=f"{ci_lo:+.1f}%",
@@ -1016,26 +1210,27 @@ elif page == "A/B Testing":
                        annotation_font_color=AMBER)
         fig2.add_vline(x=0, line_color=MUTED, opacity=0.5)
         fig2.update_layout(xaxis_title="Selisih Akurasi B−A (%)",
-                           yaxis_title="Frekuensi",
+                           yaxis_title="Frekuensi Distribusi",
                            **make_layout(330))
         apply_axes(fig2)
+        fig2.update_traces(hovertemplate="Selisih: %{x:.2f}%<br>Frekuensi: %{y}<extra></extra>")
         st.plotly_chart(fig2, use_container_width=True)
-        st.caption(f"95% CI: [{ci_lo:+.2f}%, {ci_hi:+.2f}%] — {n_te:,} sampel test")
+        st.caption(f"Interval Kepercayaan 95%: [{ci_lo:+.2f}%, {ci_hi:+.2f}%] — {n_te:,} Sampel Uji")
 
     st.divider()
-    st.subheader("Kesimpulan & Rekomendasi untuk QLOP")
+    st.subheader("💡 Kesimpulan Uji Statistik & Rekomendasi QLOP")
     if pv < 0.05:
         winner = "Strategi B (Cosine Similarity)" if aB > aA else "Strategi A (Top-3)"
         st.success(
-            f"**H₀ ditolak** (p = {pv:.4f} < 0.05)  \n"
-            f"Terdapat perbedaan **signifikan** secara statistik.  \n"
-            f"**{winner}** terbukti lebih akurat.  \n\n"
-            f"Selisih: {(aB - aA) * 100:+.2f}% · 95% CI: [{ci_lo:+.2f}%, {ci_hi:+.2f}%]"
+            f"**H₀ Ditolak** secara meyakinkan (p = {pv:.4f} < 0.05).  \n"
+            f"Terdapat perbedaan akurasi yang **sangat signifikan** secara statistik antara kedua model rekomendasi.  \n"
+            f"**{winner}** terbukti memberikan performa pencocokan CV ke opsi karir yang lebih presisi.  \n\n"
+            f"Estimasi keunggulan: {(aB - aA) * 100:+.2f}%  ·  Cakupan CI 95%: [{ci_lo:+.2f}%, {ci_hi:+.2f}%]"
         )
     else:
         st.warning(
-            f"**Gagal tolak H₀** (p = {pv:.4f} ≥ 0.05)  \n"
-            f"Tidak ada perbedaan signifikan secara statistik.  \n\n"
-            f"**Rekomendasi untuk QLOP:** Gunakan **Strategi B (Cosine Similarity)** — "
-            f"lebih scalable dan memanfaatkan seluruh dimensi skill vektor."
+            f"**Gagal Tolak H₀** (p = {pv:.4f} ≥ 0.05).  \n"
+            f"Perbedaan efisiensi antara kedua algoritma tidak menunjukkan hasil yang signifikan secara statistik pada ukuran data uji ini.  \n\n"
+            f"**Rekomendasi Teknis:** Disarankan untuk tetap menggunakan **Strategi B (Cosine Similarity)** di sistem produksi QLOP "
+            f"karena terbukti lebih scalable dan mampu memanfaatkan seluruh dimensi representasi keahlian."
         )
