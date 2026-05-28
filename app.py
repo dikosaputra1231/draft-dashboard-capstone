@@ -235,31 +235,30 @@ def apply_legend(fig):
     return fig
 
 
-def kpi_card(title, value, icon, delta=None):
-    """Custom high-contrast styled metric card with icons and beautiful alignment."""
+def kpi_card(title, value, delta=None):
+    """Custom high-contrast styled metric card — no icon, fixed equal height."""
     delta_html = ""
     if delta:
         color = GREEN if delta.startswith("+") else RED
-        delta_html = f"<div style='font-size: 12px; color: {color}; margin-top: 4px; font-weight: 600;'>{delta}</div>"
+        delta_html = f"<div style='font-size: 12px; color: {color}; margin-top: 6px; font-weight: 600;'>{delta}</div>"
     return f"""
     <div style="
         background-color: {SURFACE2};
         border: 1px solid {BORDER};
         border-radius: 12px;
-        padding: 20px;
+        padding: 22px 16px;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15);
         margin-bottom: 15px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100%;
-        min-height: 125px;
+        height: 130px;
+        box-sizing: border-box;
     ">
-        <div style="font-size: 26px; margin-bottom: 8px;">{icon}</div>
-        <div style="font-size: 11px; color: {MUTED}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">{title}</div>
-        <div style="font-size: 26px; color: #FFFFFF; font-weight: 800; margin-top: 4px; line-height: 1.2;">{value}</div>
+        <div style="font-size: 11px; color: {MUTED}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;">{title}</div>
+        <div style="font-size: 28px; color: #FFFFFF; font-weight: 800; line-height: 1.15;">{value}</div>
         {delta_html}
     </div>
     """
@@ -304,13 +303,11 @@ def hbar(data, x_col, y_col, color_scale="Blues", height=400, title="", x_label=
     return fig
 
 
-def page_header(title, description, icon="📊"):
+def page_header(title, description):
     """Uniform beautiful header helper for inside pages."""
     st.markdown(f"""
     <div style="margin-bottom: 20px;">
-        <h1 style="display: flex; align-items: center; gap: 10px;">
-            <span>{icon}</span> {title}
-        </h1>
+        <h1>{title}</h1>
         <p style="color: {MUTED}; margin: 6px 0 0; font-size: 14px; line-height: 1.4;">
             {description}
         </p>
@@ -402,9 +399,8 @@ df_c_raw = load_coursera()
 with st.sidebar:
     st.markdown(f"""
     <div style="text-align:center;padding:14px 0 10px;">
-        <div style="font-size:35px;margin-bottom:4px;">📊</div>
         <div style="font-size:18px;font-weight:800;color:{TEXT};letter-spacing:1px;">QLOP ENGINE</div>
-        <div style="font-size:11px;color:{MUTED};margin-top:2px;text-transform:uppercase;">Market Insight Dashboard</div>
+        <div style="font-size:11px;color:{MUTED};margin-top:4px;text-transform:uppercase;">Market Insight Dashboard</div>
     </div>
     """, unsafe_allow_html=True)
     st.divider()
@@ -416,7 +412,7 @@ with st.sidebar:
     )
     
     st.divider()
-    st.markdown("### 🔍 PENYARINGAN DATA")
+    st.markdown("**PENYARINGAN DATA**")
     
     # 1. Filter Role
     all_roles = sorted(df_raw["role_label"].dropna().unique())
@@ -473,7 +469,7 @@ with st.sidebar:
     st.divider()
     st.caption(f"Lowongan Aktif: {len(df):,} / {len(df_raw):,}")
     st.caption(f"Kursus Aktif: {len(df_c):,} / {len(df_c_raw):,}")
-    st.caption("Sumber: LinkedIn Indonesia & Coursera Catalog")
+    st.caption("Sumber: LinkedIn & Coursera Catalog")
 
 # ─────────────────────────────────────────────────────────────────
 # PAGE: OVERVIEW
@@ -481,9 +477,9 @@ with st.sidebar:
 if page == "Overview":
     st.markdown(f"""
     <div class="qlop-hero">
-      <h1>📊 QLOP — Market Insight Dashboard</h1>
+      <h1>QLOP — Market Insight Dashboard</h1>
       <p>
-        Dashboard interaktif untuk memetakan dinamika pasar kerja IT Indonesia. Analisis mendalam 
+        Dashboard interaktif untuk memetakan dinamika pasar kerja IT. Analisis mendalam 
         terhadap kebutuhan keterampilan (skills gap) industri berdasarkan data LinkedIn serta penawaran pembelajaran dari Coursera.
       </p>
     </div>
@@ -491,23 +487,23 @@ if page == "Overview":
 
     # Custom Centered KPI Card Grid
     k1, k2, k3, k4, k5, k6 = st.columns(6)
-    k1.markdown(kpi_card("Total Loker", f"{len(df):,}", "💼"), unsafe_allow_html=True)
-    k2.markdown(kpi_card("IT Roles", f"{df['role_label'].nunique() if not df.empty else 0}", "👤"), unsafe_allow_html=True)
-    k3.markdown(kpi_card("Skill Unik", f"{len(j_ctr):,}", "🛠️"), unsafe_allow_html=True)
-    k4.markdown(kpi_card("Total Course", f"{len(df_c):,}", "🎓"), unsafe_allow_html=True)
+    k1.markdown(kpi_card("Total Loker", f"{len(df):,}"), unsafe_allow_html=True)
+    k2.markdown(kpi_card("IT Roles", f"{df['role_label'].nunique() if not df.empty else 0}"), unsafe_allow_html=True)
+    k3.markdown(kpi_card("Skill Unik", f"{len(j_ctr):,}"), unsafe_allow_html=True)
+    k4.markdown(kpi_card("Total Course", f"{len(df_c):,}"), unsafe_allow_html=True)
     
     remote_val = f"{df['workRemoteAllowed'].fillna(0).astype(float).mean()*100:.1f}%" if not df.empty else "0.0%"
-    k5.markdown(kpi_card("Remote Work", remote_val, "🏠"), unsafe_allow_html=True)
+    k5.markdown(kpi_card("Remote Work", remote_val), unsafe_allow_html=True)
     
     avg_skill_val = f"{df['skill_count'].mean():.1f}" if not df.empty else "0.0"
-    k6.markdown(kpi_card("Avg Skill/Loker", avg_skill_val, "📊"), unsafe_allow_html=True)
+    k6.markdown(kpi_card("Avg Skill/Loker", avg_skill_val), unsafe_allow_html=True)
 
     st.divider()
 
     # Row 1: role distribution + yearly trend + employment
     col_a, col_b = st.columns([3, 2], gap="medium")
     with col_a:
-        st.subheader("📋 Distribusi Lowongan per Peran IT")
+        st.subheader("Distribusi Lowongan per Peran IT")
         if not df.empty:
             rc = df["role_label"].value_counts().reset_index()
             rc.columns = ["role", "count"]
@@ -517,7 +513,7 @@ if page == "Overview":
             st.warning("Tidak ada data lowongan pekerjaan untuk filter yang aktif.")
 
     with col_b:
-        st.subheader("📈 Tren Posting Loker per Tahun")
+        st.subheader("Tren Posting Loker per Tahun")
         if not df.empty and df["year"].notna().any():
             yt = df[df["year"].between(2022, 2026)].groupby("year").size().reset_index(name="count")
             fig2 = px.area(yt, x="year", y="count", markers=True,
@@ -531,7 +527,7 @@ if page == "Overview":
         else:
             st.info("Pilih filter tahun yang valid untuk melihat tren tahunan.")
 
-        st.subheader("👔 Jenis Pekerjaan (Employment Type)")
+        st.subheader("Jenis Pekerjaan (Employment Type)")
         if not df.empty:
             em = df["employmentType"].value_counts().reset_index()
             em.columns = ["type", "count"]
@@ -547,14 +543,14 @@ if page == "Overview":
     st.divider()
 
     # Row 2: top 10 skills side-by-side (Horizontal for premium space usage)
-    st.subheader("🔥 Top 10 Keterampilan — Permintaan (LinkedIn) vs Ketersediaan (Coursera)")
+    st.subheader("Top 10 Keterampilan — Permintaan (LinkedIn) vs Ketersediaan (Coursera)")
     ca, cb = st.columns(2, gap="medium")
     with ca:
         t10j = pd.DataFrame(j_ctr.most_common(10), columns=["skill", "count"])
         fig = hbar(
             t10j, "count", "skill", 
             color_scale="Blues", height=380, 
-            title="Skill Paling Dicari Industri (LinkedIn Indonesia)",
+            title="Skill Paling Dicari Industri (LinkedIn)",
             x_label="Jumlah Lowongan"
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -573,7 +569,7 @@ if page == "Overview":
     # Row 3: seniority + remote snapshot
     cs, cr = st.columns(2, gap="medium")
     with cs:
-        st.subheader("🎓 Distribusi Seniority Level")
+        st.subheader("Distribusi Seniority Level")
         df_sen = df[df["seniorityLevel"].isin(SEN_ORDER)]
         if not df_sen.empty:
             sc = df_sen["seniorityLevel"].value_counts().reindex(SEN_ORDER).dropna().reset_index()
@@ -590,7 +586,7 @@ if page == "Overview":
             st.info("Tidak ada data tingkat senioritas pada filter aktif.")
 
     with cr:
-        st.subheader("🏠 Tingkat Remote Work — Top 10 Role")
+        st.subheader("Tingkat Remote Work — Top 10 Role")
         df_rm = df.dropna(subset=["workRemoteAllowed"]).copy()
         if not df_rm.empty:
             df_rm["is_remote"] = df_rm["workRemoteAllowed"].astype(float).astype(bool)
@@ -616,8 +612,7 @@ if page == "Overview":
 elif page == "Skill Demand":
     page_header(
         "Kebutuhan Keterampilan Kerja IT", 
-        "Analisis mendalam terhadap keahlian teknis terpenting yang dicari oleh rekruter di pasar kerja Indonesia.",
-        "🛠️"
+        "Analisis mendalam terhadap keahlian teknis terpenting yang dicari oleh rekruter di pasar kerja."
     )
 
     tab1, tab2, tab3 = st.tabs(["Top Keterampilan Global", "Kebutuhan per Peran (Role)", "Peta Hubungan (Heatmap)"])
@@ -640,7 +635,7 @@ elif page == "Skill Demand":
             fig = hbar(tsk, "count", "skill", height=max(420, top_n * 22), title=f"Top {top_n} Keahlian Paling Dicari")
             st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("📈 Tren Perkembangan Top 8 Keterampilan per Tahun")
+        st.subheader("Tren Perkembangan Top 8 Keterampilan per Tahun")
         top8 = [s for s, _ in ctr_f.most_common(8)]
         rows = []
         for _, row in df.dropna(subset=["year"]).iterrows():
@@ -683,19 +678,19 @@ elif page == "Skill Demand":
                 else:
                     st.info("Data keterampilan untuk role ini tidak tersedia.")
             with c2:
-                st.markdown(f"### 📋 Profil Karir: {rs}")
+                st.markdown(f"### Profil Karir: {rs}")
                 
                 # Dynamic Custom Centered KPI Card Stack
-                st.markdown(kpi_card("Total Loker Terdeteksi", f"{len(dfr):,}", "💼"), unsafe_allow_html=True)
+                st.markdown(kpi_card("Total Loker Terdeteksi", f"{len(dfr):,}"), unsafe_allow_html=True)
                 
                 avg_sk = dfr['skill_count'].mean() if not dfr.empty else 0
-                st.markdown(kpi_card("Rata-rata Skill/Loker", f"{avg_sk:.1f}", "📊"), unsafe_allow_html=True)
+                st.markdown(kpi_card("Rata-rata Skill/Loker", f"{avg_sk:.1f}"), unsafe_allow_html=True)
                 
                 remote_pct = dfr['workRemoteAllowed'].fillna(0).astype(float).mean() * 100 if not dfr.empty else 0
-                st.markdown(kpi_card("Toleransi Kerja Remote", f"{remote_pct:.1f}%", "🏠"), unsafe_allow_html=True)
+                st.markdown(kpi_card("Toleransi Kerja Remote", f"{remote_pct:.1f}%"), unsafe_allow_html=True)
                 
                 avg_appl = dfr['applicantsCount'].mean() if not dfr.empty else 0
-                st.markdown(kpi_card("Rata-rata Pelamar/Loker", f"{avg_appl:.0f}", "👥"), unsafe_allow_html=True)
+                st.markdown(kpi_card("Rata-rata Pelamar/Loker", f"{avg_appl:.0f}"), unsafe_allow_html=True)
 
                 st.markdown("<b>5 Kompetensi Paling Kritis:</b>", unsafe_allow_html=True)
                 for s, c in rctr.most_common(5):
@@ -707,7 +702,7 @@ elif page == "Skill Demand":
             st.warning("Tidak ada peran pekerjaan yang tersedia di filter saat ini.")
 
     with tab3:
-        st.subheader("🗺️ Peta Hubungan Keterampilan Terpopuler per Peran IT")
+        st.subheader("Peta Hubungan Keterampilan Terpopuler per Peran IT")
         st.caption("Visualisasi sebaran intensitas kemunculan (%) skill di berbagai role IT utama.")
         
         nh = st.slider("Tampilkan Top N Keterampilan", 10, 30, 20, key="sd_heatmap_count")
@@ -746,14 +741,13 @@ elif page == "Skill Demand":
 elif page == "Hiring Trends":
     page_header(
         "Tren Perekrutan & Karakteristik Lowongan",
-        "Meninjau tingkat kompetisi antar pelamar, preferensi jenis kerja remote, hingga tuntutan profil senioritas.",
-        "📈"
+        "Meninjau tingkat kompetisi antar pelamar, preferensi jenis kerja remote, hingga tuntutan profil senioritas."
     )
 
     tab1, tab2, tab3 = st.tabs(["Kompetisi & Minat", "Kerja Remote (Adopsi)", "Senioritas & Jenis Kontrak"])
 
     with tab1:
-        st.subheader("👥 Analisis Persaingan Pelamar per Peran IT")
+        st.subheader("Analisis Persaingan Pelamar per Peran IT")
         st.caption("Membandingkan rata-rata jumlah pelamar per posting pekerjaan pada tiap-tiap role IT.")
         
         if not df.empty:
@@ -793,7 +787,7 @@ elif page == "Hiring Trends":
             st.warning("Tidak ada data untuk memetakan tingkat kompetisi.")
 
     with tab2:
-        st.subheader("🏠 Porsi Penerapan Model Kerja Remote")
+        st.subheader("Porsi Penerapan Model Kerja Remote")
         
         df_rm = df.dropna(subset=["workRemoteAllowed"]).copy()
         if not df_rm.empty:
@@ -821,14 +815,14 @@ elif page == "Hiring Trends":
                 fig2.update_layout(showlegend=False, **make_layout(270))
                 st.plotly_chart(fig2, use_container_width=True)
                 
-                st.markdown(kpi_card("Rerata Adopsi Remote", f"{avg_r:.1f}%", "🏠"), unsafe_allow_html=True)
+                st.markdown(kpi_card("Rerata Adopsi Remote", f"{avg_r:.1f}%"), unsafe_allow_html=True)
                 if not rr2.empty:
-                    st.markdown(kpi_card("Role Paling Terbuka", f"{rr2.iloc[0]['role_label']}", "🌟"), unsafe_allow_html=True)
+                    st.markdown(kpi_card("Role Paling Terbuka", f"{rr2.iloc[0]['role_label']}"), unsafe_allow_html=True)
         else:
             st.info("Pilih filter tahun/role lain yang merekam data workRemoteAllowed.")
 
     with tab3:
-        st.subheader("🎓 Klasifikasi Pengalaman Kerja & Jenis Kontrak")
+        st.subheader("Klasifikasi Pengalaman Kerja & Jenis Kontrak")
         df_sen = df[df["seniorityLevel"].isin(SEN_ORDER)].copy()
         
         c1, c2 = st.columns(2, gap="medium")
@@ -865,7 +859,7 @@ elif page == "Hiring Trends":
             else:
                 st.info("Data role senioritas tidak ditemukan.")
 
-        st.subheader("👔 Pola Perekrutan Berdasarkan Jenis Kemitraan")
+        st.subheader("Pola Perekrutan Berdasarkan Jenis Kemitraan")
         c1, c2 = st.columns(2, gap="medium")
         with c1:
             st.markdown("#### Struktur Global Employment Type")
@@ -906,8 +900,7 @@ elif page == "Hiring Trends":
 elif page == "Course Supply":
     page_header(
         "Ketersediaan Materi Pembelajaran (Course Supply)",
-        "Mengevaluasi program-program peningkatan keterampilan (upskilling) Coursera yang relevan dengan kosakatanya industri.",
-        "🎓"
+        "Mengevaluasi program-program peningkatan keterampilan (upskilling) Coursera yang relevan dengan kebutuhan industri."
     )
 
     tab1, tab2, tab3 = st.tabs(["Overview Kursus", "Distribusi Keterampilan Coursera", "Kursus per Peran (Role)"])
@@ -915,17 +908,17 @@ elif page == "Course Supply":
     with tab1:
         # Dynamic Custom Centered KPI Card Grid
         k1, k2, k3, k4 = st.columns(4)
-        k1.markdown(kpi_card("Total Kursus Aktif", f"{len(df_c):,}", "🎓"), unsafe_allow_html=True)
-        k2.markdown(kpi_card("Kategori Peran Tercakup", f"{df_c['role_category'].nunique() if not df_c.empty else 0}", "👤"), unsafe_allow_html=True)
-        k3.markdown(kpi_card("Skill Terkoneksi LinkedIn", f"{len(c_ctr)}", "🛠️"), unsafe_allow_html=True)
+        k1.markdown(kpi_card("Total Kursus Aktif", f"{len(df_c):,}"), unsafe_allow_html=True)
+        k2.markdown(kpi_card("Kategori Peran Tercakup", f"{df_c['role_category'].nunique() if not df_c.empty else 0}"), unsafe_allow_html=True)
+        k3.markdown(kpi_card("Skill Terkoneksi LinkedIn", f"{len(c_ctr)}"), unsafe_allow_html=True)
         
         avg_c_skills = df_c['skill_count'].mean() if not df_c.empty else 0
-        k4.markdown(kpi_card("Avg Skill per Kursus", f"{avg_c_skills:.1f}", "📊"), unsafe_allow_html=True)
+        k4.markdown(kpi_card("Avg Skill per Kursus", f"{avg_c_skills:.1f}"), unsafe_allow_html=True)
         
         st.divider()
         c1, c2 = st.columns(2, gap="medium")
         with c1:
-            st.subheader("📚 Top 15 Klasifikasi Peran Kursus di Coursera")
+            st.subheader("Top 15 Klasifikasi Peran Kursus di Coursera")
             if not df_c.empty:
                 cc = df_c["role_category"].value_counts().head(15).reset_index()
                 cc.columns = ["role", "count"]
@@ -934,7 +927,7 @@ elif page == "Course Supply":
             else:
                 st.warning("Tidak ada data program kursus dalam filter yang dipilih.")
         with c2:
-            st.subheader("🌟 Tingkat Kesulitan Pembelajaran")
+            st.subheader("Tingkat Kesulitan Pembelajaran")
             if not df_c.empty:
                 di = df_c["difficulty"].value_counts().reset_index()
                 di.columns = ["level", "count"]
@@ -947,7 +940,7 @@ elif page == "Course Supply":
             else:
                 st.info("Data tingkat kesulitan tidak tersedia.")
 
-            st.subheader("⏱️ Rentang Durasi Kursus")
+            st.subheader("Rentang Durasi Kursus")
             if not df_c.empty:
                 du = df_c["duration"].value_counts().reset_index()
                 du.columns = ["durasi", "count"]
@@ -965,7 +958,7 @@ elif page == "Course Supply":
                 st.info("Data durasi kursus tidak tersedia.")
 
     with tab2:
-        st.subheader("🎓 Distribusi Keterampilan yang Diajarkan Coursera")
+        st.subheader("Distribusi Keterampilan yang Diajarkan Coursera")
         st.caption("Analisis kompetensi yang paling sering dibahas dalam katalog pembelajaran Coursera")
         
         # Calculate skill counts from filtered Coursera dataset
@@ -985,7 +978,7 @@ elif page == "Course Supply":
             )
             st.plotly_chart(fig_c_dist, use_container_width=True)
             
-            st.markdown("#### ✨ Kumpulan Keterampilan Utama di Coursera")
+            st.markdown("#### Kumpulan Keterampilan Utama di Coursera")
             st.caption("Kompetensi paling berlimpah berdasarkan frekuensi sebaran materi ajar.")
             
             col_chips_1, col_chips_2 = st.columns(2)
@@ -1002,7 +995,7 @@ elif page == "Course Supply":
             st.warning("Tidak ada data keterampilan untuk filter yang dipilih.")
 
     with tab3:
-        st.subheader("🔍 Temukan Kursus Sesuai Kebutuhan Peran IT")
+        st.subheader("Temukan Kursus Sesuai Kebutuhan Peran IT")
         
         rs3 = st.selectbox("Pilih Peran Pekerjaan (Role)", sorted(df_raw["role_label"].dropna().unique()), key="cs_role")
         
@@ -1032,7 +1025,7 @@ elif page == "Course Supply":
                         <div style="font-size:14px;font-weight:700;">
                             <a href="{row['url']}" target="_blank"
                                style="color:{BLUE};text-decoration:none;hover:underline;">
-                                📖 {row['name']}
+                                {row['name']}
                             </a>
                         </div>
                         <div style="font-size:12px;color:{MUTED};margin:6px 0;">
@@ -1040,7 +1033,7 @@ elif page == "Course Supply":
                             <span style="color:{diff_col};font-weight:700;">
                                 {row.get('difficulty', '')}
                             </span>
-                            &nbsp;·&nbsp; ⏰ {dur_str}
+                            &nbsp;·&nbsp; {dur_str}
                         </div>
                         <div style="font-size:12px;color:{TEXT};background:rgba(255,255,255,0.03);padding:6px;border-radius:6px;border:1px solid {BORDER}">
                             <b>Fokus Keahlian:</b> {", ".join(skp)}{more}
@@ -1051,10 +1044,10 @@ elif page == "Course Supply":
                 st.warning(f"Belum ada kursus di Coursera yang ter-mapping secara pas untuk role '{rs3}' dengan filter saat ini.")
 
         with c2:
-            st.markdown(f"### 📊 Ringkasan Pembelajaran — {rs3}")
+            st.markdown(f"### Ringkasan Pembelajaran — {rs3}")
             
             if not df_cr.empty:
-                st.markdown(kpi_card("Program Tersedia", f"{len(df_cr)} Kursus", "🎓"), unsafe_allow_html=True)
+                st.markdown(kpi_card("Program Tersedia", f"{len(df_cr)} Kursus"), unsafe_allow_html=True)
                 
                 # Pie Chart showing Course Difficulty Breakdown for this Role
                 st.markdown("<div style='margin-top: 15px; margin-bottom: 5px; font-weight:600;'>Komposisi Tingkat Kesulitan:</div>", unsafe_allow_html=True)
@@ -1092,8 +1085,7 @@ elif page == "Course Supply":
 elif page == "A/B Testing":
     page_header(
         "Validasi Eksperimen Algoritma (A/B Testing)",
-        "Membandingkan efektivitas strategi penataan model mapping rekomendasi karir berbasis kurikulum.",
-        "🔬"
+        "Membandingkan efektivitas strategi penataan model mapping rekomendasi karir berbasis kurikulum."
     )
     
     st.info(
@@ -1178,7 +1170,7 @@ elif page == "A/B Testing":
     st.divider()
     c1, c2 = st.columns(2, gap="medium")
     with c1:
-        st.subheader("📊 Komparasi Akurasi Pemetaan Precision@1")
+        st.subheader("Komparasi Akurasi Pemetaan Precision@1")
         fig = go.Figure(go.Bar(
             x=["Strategi A<br>(Top-3 Heuristik)", "Strategi B<br>(Cosine Similarity)"],
             y=[aA * 100, aB * 100],
@@ -1195,7 +1187,7 @@ elif page == "A/B Testing":
         fig.update_traces(hovertemplate="Strategi: %{x}<br>Akurasi: %{y:.2f}%<extra></extra>")
         st.plotly_chart(fig, use_container_width=True)
     with c2:
-        st.subheader("📊 Distribusi Bootstrap (Selisih Akurasi B − A)")
+        st.subheader("Distribusi Bootstrap (Selisih Akurasi B − A)")
         fig2 = go.Figure()
         fig2.add_trace(go.Histogram(x=boot * 100, nbinsx=50,
                                     marker_color=BLUE, opacity=0.8))
@@ -1218,7 +1210,7 @@ elif page == "A/B Testing":
         st.caption(f"Interval Kepercayaan 95%: [{ci_lo:+.2f}%, {ci_hi:+.2f}%] — {n_te:,} Sampel Uji")
 
     st.divider()
-    st.subheader("💡 Kesimpulan Uji Statistik & Rekomendasi QLOP")
+    st.subheader("Kesimpulan Uji Statistik & Rekomendasi QLOP")
     if pv < 0.05:
         winner = "Strategi B (Cosine Similarity)" if aB > aA else "Strategi A (Top-3)"
         st.success(
