@@ -1160,12 +1160,12 @@ elif page == "A/B Testing":
 
     # Custom Centered KPI Card Grid for A/B metrics
     k1, k2, k3, k4 = st.columns(4)
-    k1.markdown(kpi_card("Strategi A (Top-3 Heuristik)", f"{aA * 100:.2f}%", "🧮"), unsafe_allow_html=True)
-    k2.markdown(kpi_card("Strategi B (Cosine Similarity)", f"{aB * 100:.2f}%", "🤖", delta=f"{(aB - aA) * 100:+.2f}%"), unsafe_allow_html=True)
-    k3.markdown(kpi_card("McNemar p-value", f"{pv:.4f}", "📊"), unsafe_allow_html=True)
+    k1.markdown(kpi_card("Strategi A (Top-3 Heuristik)", f"{aA * 100:.2f}%"), unsafe_allow_html=True)
+    k2.markdown(kpi_card("Strategi B (Cosine Similarity)", f"{aB * 100:.2f}%", delta=f"{(aB - aA) * 100:+.2f}%"), unsafe_allow_html=True)
+    k3.markdown(kpi_card("McNemar p-value", f"{pv:.4f}"), unsafe_allow_html=True)
     
     decision = "Tolak H₀ (Signifikan)" if pv < 0.05 else "Gagal Tolak H₀"
-    k4.markdown(kpi_card("Keputusan Statistik", decision, "🔬"), unsafe_allow_html=True)
+    k4.markdown(kpi_card("Keputusan Statistik", decision), unsafe_allow_html=True)
 
     st.divider()
     c1, c2 = st.columns(2, gap="medium")
