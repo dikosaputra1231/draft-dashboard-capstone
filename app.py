@@ -335,6 +335,10 @@ def load_jobs():
     )
     df["postedAt"] = pd.to_datetime(df["postedAt"], dayfirst=True, errors="coerce")
     df["year"] = df["postedAt"].dt.year
+    # Hapus baris dengan role_label undefined / NaN / string kosong
+    df = df[df["role_label"].notna()]
+    df = df[df["role_label"].str.strip().str.lower() != "undefined"]
+    df = df[df["role_label"].str.strip() != ""]
     return df
 
 
@@ -503,7 +507,7 @@ if page == "Overview":
     # Row 1: role distribution + yearly trend + employment
     col_a, col_b = st.columns([3, 2], gap="medium")
     with col_a:
-        st.subheader("Distribusi Lowongan per Peran IT")
+        st.subheader("Volume Lowongan IT per Peran Pekerjaan")
         if not df.empty:
             rc = df["role_label"].value_counts().reset_index()
             rc.columns = ["role", "count"]
@@ -513,29 +517,45 @@ if page == "Overview":
             st.warning("Tidak ada data lowongan pekerjaan untuk filter yang aktif.")
 
     with col_b:
-        st.subheader("Tren Posting Loker per Tahun")
+        st.subheader("Tren Pertumbuhan Posting Loker (2025–2026)")
         if not df.empty and df["year"].notna().any():
-            yt = df[df["year"].between(2022, 2026)].groupby("year").size().reset_index(name="count")
-            fig2 = px.area(yt, x="year", y="count", markers=True,
-                           color_discrete_sequence=[BLUE])
-            fig2.update_traces(fill="tozeroy", fillcolor="rgba(59,130,246,.15)",
-                               line_width=2.5, marker_size=7,
-                               hovertemplate="<b>Tahun %{x}</b><br>Lowongan: %{y}<extra></extra>")
-            fig2.update_layout(xaxis_title="Tahun", yaxis_title="Jumlah Lowongan", **make_layout(225))
-            apply_axes(fig2)
-            st.plotly_chart(fig2, use_container_width=True)
+            # Fokus pada tahun dengan data konsisten dan valid (2025-2026)
+            yt = df[df["year"].isin([2025, 2026])].groupby("year").size().reset_index(name="count")
+            if not yt.empty:
+                fig2 = px.area(yt, x="year", y="count", markers=True,
+                               color_discrete_sequence=[BLUE])
+                fig2.update_traces(fill="tozeroy", fillcolor="rgba(59,130,246,.15)",
+                                   line_width=2.5, marker_size=7,
+                                   hovertemplate="<b>Tahun %{x}</b><br>Lowongan: %{y}<extra></extra>")
+                fig2.update_layout(
+                    xaxis_title="Tahun", yaxis_title="Jumlah Lowongan",
+                    xaxis=dict(tickmode="array", tickvals=[2025, 2026], tickformat="d"),
+                    **make_layout(250)
+                )
+                apply_axes(fig2)
+                st.plotly_chart(fig2, use_container_width=True)
+            else:
+                st.info("Data posting loker untuk tahun 2025–2026 belum tersedia.")
         else:
             st.info("Pilih filter tahun yang valid untuk melihat tren tahunan.")
 
-        st.subheader("Jenis Pekerjaan (Employment Type)")
+        st.subheader("Komposisi Jenis Kontrak Pekerjaan")
         if not df.empty:
             em = df["employmentType"].value_counts().reset_index()
             em.columns = ["type", "count"]
-            fig3 = px.pie(em, values="count", names="type", hole=0.55,
+            # Kelompokkan kategori kecil (< 2% dari total) ke "Lainnya"
+            total_em = em["count"].sum()
+            threshold = total_em * 0.02
+            main_em = em[em["count"] >= threshold].copy()
+            others_em = em[em["count"] < threshold]
+            if not others_em.empty:
+                others_row = pd.DataFrame([{"type": "Lainnya", "count": others_em["count"].sum()}])
+                main_em = pd.concat([main_em, others_row], ignore_index=True)
+            fig3 = px.pie(main_em, values="count", names="type", hole=0.55,
                           color_discrete_sequence=px.colors.qualitative.Pastel)
             fig3.update_traces(textposition="inside", textinfo="percent+label", textfont_size=11,
                                hovertemplate="<b>%{label}</b><br>Jumlah: %{value} (%{percent})<extra></extra>")
-            fig3.update_layout(showlegend=False, **make_layout(250))
+            fig3.update_layout(showlegend=False, **make_layout(280))
             st.plotly_chart(fig3, use_container_width=True)
         else:
             st.warning("Tidak ada data jenis pekerjaan.")
@@ -669,15 +689,9 @@ elif page == "Skill Demand":
             rctr  = Counter(rs_all)
             tprol = pd.DataFrame(rctr.most_common(ns), columns=["skill", "count"])
 
-            c1, c2 = st.columns([2, 1], gap="medium")
+            # Profil role di sebelah KIRI (manusia membaca kiri ke kanan)
+            c1, c2 = st.columns([1, 2], gap="medium")
             with c1:
-                if not tprol.empty:
-                    fig = hbar(tprol, "count", "skill", height=max(320, ns * 36),
-                               title=f"Top {ns} Keterampilan Terpenting untuk {rs} ({len(dfr):,} Loker)")
-                    st.plotly_chart(fig, use_container_width=True)
-                else:
-                    st.info("Data keterampilan untuk role ini tidak tersedia.")
-            with c2:
                 st.markdown(f"### Profil Karir: {rs}")
                 
                 # Dynamic Custom Centered KPI Card Stack
@@ -698,6 +712,14 @@ elif page == "Skill Demand":
                     st.markdown(
                         f"<span class='chip chip-blue'>{s} &nbsp;({pct:.0f}%)</span>",
                         unsafe_allow_html=True)
+
+            with c2:
+                if not tprol.empty:
+                    fig = hbar(tprol, "count", "skill", height=max(420, ns * 36),
+                               title=f"Top {ns} Keterampilan Paling Dibutuhkan untuk {rs} ({len(dfr):,} Loker)")
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.info("Data keterampilan untuk role ini tidak tersedia.")
         else:
             st.warning("Tidak ada peran pekerjaan yang tersedia di filter saat ini.")
 
