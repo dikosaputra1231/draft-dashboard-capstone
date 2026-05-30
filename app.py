@@ -294,10 +294,13 @@ def hbar(data, x_col, y_col, color_scale="Blues", height=400, title="", x_label=
         hovertemplate="<b>%{y}</b><br>" + x_label + ": %{x}<extra></extra>"
     )
     fig.update_coloraxes(showscale=False)
+    
+    layout_title = dict(text=title, font=dict(size=13, color=TEXT)) if title else dict(text="")
+    
     fig.update_layout(
         yaxis_categoryorder="total ascending",
         xaxis_title=x_label, yaxis_title="",
-        title_font_size=13, title_font_color=TEXT,
+        title=layout_title,
         **make_layout(height),
     )
     apply_axes(fig)
@@ -331,8 +334,10 @@ def lollipop(data, x_col, y_col, color=None, height=380, title="", x_label=""):
         hovertemplate="<b>%{y}</b><br>" + x_label + ": %{x}<extra></extra>",
         showlegend=False,
     ))
+    layout_title = dict(text=title, font=dict(size=13, color=TEXT)) if title else dict(text="")
+    
     fig.update_layout(
-        title=title, title_font_size=13, title_font_color=TEXT,
+        title=layout_title,
         yaxis_categoryorder="array",
         yaxis_categoryarray=data[y_col].tolist(),
         xaxis_title=x_label, yaxis_title="",
