@@ -687,12 +687,10 @@ if page == "Overview":
             fig = hbar(rr, "pct", "role_label", color_scale="Greens", height=255, x_label="Persentase Kerja Remote (%)")
             fig.add_vline(
                 x=avg_r, line_dash="dash", line_color=AMBER,
-                annotation=dict(
-                    text=f"Rata-rata {avg_r:.1f}%",
-                    xanchor="center", yanchor="bottom",
-                    y=1.02, font=dict(color=AMBER, size=11),
-                    showarrow=False,
-                ),
+                annotation_text=f"Rata-rata {avg_r:.1f}%",
+                annotation_position="top",
+                annotation_font_color=AMBER,
+                annotation_font_size=11,
             )
             st.plotly_chart(fig, use_container_width=True)
         else:
@@ -762,7 +760,14 @@ elif page == "Skill Demand":
                 xaxis_title="Bulan", yaxis_title="Jumlah Kemunculan",
                 xaxis=dict(tickangle=-35),
                 showlegend=True,
-                legend=dict(title_text="Keterampilan"),
+                legend=dict(
+                    title_text="Keterampilan",
+                    yanchor="top",
+                    y=0.99,
+                    xanchor="left",
+                    x=1.02
+                ),
+                margin=dict(r=120),
                 **make_layout(420),
             )
             apply_axes(fig2)
@@ -942,12 +947,10 @@ elif page == "Hiring Trends":
                 fig = hbar(rr2, "pct", "role_label", color_scale="Greens", height=560, x_label="Persentase Kerja Remote (%)")
                 fig.add_vline(
                     x=avg_r, line_dash="dash", line_color=AMBER,
-                    annotation=dict(
-                        text=f"Rata-rata {avg_r:.1f}%",
-                        xanchor="center", yanchor="bottom",
-                        y=1.02, font=dict(color=AMBER, size=11),
-                        showarrow=False,
-                    ),
+                    annotation_text=f"Rata-rata {avg_r:.1f}%",
+                    annotation_position="top",
+                    annotation_font_color=AMBER,
+                    annotation_font_size=11,
                 )
                 st.plotly_chart(fig, use_container_width=True)
         else:
