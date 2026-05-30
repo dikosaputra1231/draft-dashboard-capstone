@@ -210,14 +210,15 @@ TICK = MUTED
 
 def make_layout(height=400, **extra):
     """Base layout dict — does NOT include xaxis/yaxis keys."""
-    return dict(
+    res = dict(
         height=height,
         paper_bgcolor=SURFACE,
         plot_bgcolor=SURFACE2,
         font=dict(color=TEXT, family="Inter, system-ui, sans-serif", size=12),
         margin=dict(t=36, b=20, l=10, r=14),
-        **extra,
     )
+    res.update(extra)
+    return res
 
 
 def apply_axes(fig):
