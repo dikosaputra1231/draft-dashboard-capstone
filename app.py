@@ -728,11 +728,11 @@ elif page == "Skill Demand":
             fig = hbar(tsk, "count", "skill", height=max(420, top_n * 22), title=f"Top {top_n} Keahlian Paling Dicari")
             st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Tren Perkembangan Keterampilan per Bulan (2025–2026)")
+        st.subheader("Tren Perkembangan Keterampilan (Januari – Mei 2026)")
         top8 = [s for s, _ in ctr_f.most_common(8)]
         rows_m = []
         for _, row in df.dropna(subset=["year_month"]).iterrows():
-            if row["year"] in [2025, 2026]:
+            if row["year"] == 2026:
                 for sk in row["skills_list"]:
                     if sk in top8:
                         rows_m.append({"YearMonth": row["year_month"], "Skill": sk})
@@ -750,33 +750,26 @@ elif page == "Skill Demand":
                 if sk_df.empty:
                     continue
                 col = SKILL_COLORS[i % len(SKILL_COLORS)]
-                # Tambahkan mode text hanya di titik terakhir
-                n = len(sk_df)
-                modes = ["lines+markers"] * n
-                texts = [""] * n
-                texts[-1] = f" {sk}"
-                textpos = ["middle right"] * n
                 fig2.add_trace(go.Scatter(
                     x=sk_df["MonthLabel"], y=sk_df["Count"],
-                    mode="lines+markers+text",
+                    mode="lines+markers",
                     name=sk,
                     line=dict(color=col, width=2.5),
                     marker=dict(size=6, color=col),
-                    text=texts,
-                    textposition=textpos,
-                    textfont=dict(color=col, size=10, family="Inter, sans-serif"),
                     hovertemplate=f"<b>{sk}</b><br>%{{x}}<br>Kemunculan: %{{y}}<extra></extra>",
                 ))
             fig2.update_layout(
                 xaxis_title="Bulan", yaxis_title="Jumlah Kemunculan",
                 xaxis=dict(tickangle=-35),
-                showlegend=False,
+                showlegend=True,
+                legend=dict(title_text="Keterampilan"),
                 **make_layout(420),
             )
             apply_axes(fig2)
+            apply_legend(fig2)
             st.plotly_chart(fig2, use_container_width=True)
         else:
-            st.info("Data tren keterampilan per bulan untuk 2025–2026 belum tersedia.")
+            st.info("Data tren keterampilan per bulan untuk 2026 belum tersedia.")
 
     with tab2:
         if not df.empty:
