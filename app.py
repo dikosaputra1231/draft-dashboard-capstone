@@ -767,8 +767,7 @@ elif page == "Skill Demand":
                     xanchor="left",
                     x=1.02
                 ),
-                margin=dict(r=120),
-                **make_layout(420),
+                **make_layout(420, margin=dict(t=36, b=20, l=10, r=120)),
             )
             apply_axes(fig2)
             apply_legend(fig2)
