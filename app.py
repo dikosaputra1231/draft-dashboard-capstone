@@ -627,22 +627,24 @@ if page == "Overview":
 
     st.divider()
 
-    # Row 2: top 10 skills — lollipop chart (lebih modern dari horizontal bar)
+    # Row 2: top 10 skills — bar chart
     st.subheader("Top 10 Keterampilan — Permintaan Industri vs Ketersediaan Kursus")
     ca, cb = st.columns(2, gap="medium")
     with ca:
         t10j = pd.DataFrame(j_ctr.most_common(10), columns=["skill", "count"])
-        fig = lollipop(
-            t10j, "count", "skill", color=BLUE, height=420,
-            title="Skill Paling Dicari oleh Rekruter (LinkedIn)",
+        fig = hbar(
+            t10j, "count", "skill",
+            color_scale="Blues", height=420,
+            title="Keterampilan Paling Dicari oleh Rekruter (LinkedIn)",
             x_label="Jumlah Lowongan",
         )
         st.plotly_chart(fig, use_container_width=True)
     with cb:
         t10c = pd.DataFrame(c_ctr.most_common(10), columns=["skill", "count"])
-        fig = lollipop(
-            t10c, "count", "skill", color=VIOLET, height=420,
-            title="Skill Terbanyak Diajarkan di Coursera",
+        fig = hbar(
+            t10c, "count", "skill",
+            color_scale="Purples", height=420,
+            title="Keterampilan Terbanyak Diajarkan di Coursera",
             x_label="Jumlah Kursus",
         )
         st.plotly_chart(fig, use_container_width=True)
@@ -669,8 +671,11 @@ if page == "Overview":
             st.info("Tidak ada data tingkat senioritas pada filter aktif.")
 
     with cr:
-        st.subheader("10 Peran IT Paling Terbuka untuk Kerja Remote")
+        st.subheader("10 Peran IT dengan Tingkat Kerja Remote Tertinggi")
         df_rm = df.dropna(subset=["workRemoteAllowed"]).copy()
+        # Filter tambahan: pastikan role_label bersih
+        df_rm = df_rm[df_rm["role_label"].notna()]
+        df_rm = df_rm[df_rm["role_label"].str.strip().str.lower() != "undefined"]
         if not df_rm.empty:
             df_rm["is_remote"] = df_rm["workRemoteAllowed"].astype(float).astype(bool)
             rr = (df_rm.groupby("role_label")
@@ -678,15 +683,20 @@ if page == "Overview":
                   .assign(pct=lambda x: (x.remote / x.total * 100).round(1))
                   .nlargest(10, "pct").reset_index())
             avg_r = df_rm["is_remote"].mean() * 100
-            
-            fig = hbar(rr, "pct", "role_label", color_scale="Greens", height=255, x_label="Persentase Remote (%)")
-            fig.add_vline(x=avg_r, line_dash="dash", line_color=AMBER,
-                          annotation_text=f"Rata-rata Global {avg_r:.1f}%",
-                          annotation_position="top right",
-                          annotation_font_color=AMBER)
+
+            fig = hbar(rr, "pct", "role_label", color_scale="Greens", height=255, x_label="Persentase Kerja Remote (%)")
+            fig.add_vline(
+                x=avg_r, line_dash="dash", line_color=AMBER,
+                annotation=dict(
+                    text=f"Rata-rata {avg_r:.1f}%",
+                    xanchor="center", yanchor="bottom",
+                    y=1.02, font=dict(color=AMBER, size=11),
+                    showarrow=False,
+                ),
+            )
             st.plotly_chart(fig, use_container_width=True)
         else:
-            st.info("Tidak ada data remote work yang cocok dengan filter.")
+            st.info("Tidak ada data kerja remote yang cocok dengan filter.")
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -718,27 +728,55 @@ elif page == "Skill Demand":
             fig = hbar(tsk, "count", "skill", height=max(420, top_n * 22), title=f"Top {top_n} Keahlian Paling Dicari")
             st.plotly_chart(fig, use_container_width=True)
 
-        st.subheader("Tren Perkembangan Top 8 Keterampilan per Tahun")
+        st.subheader("Tren Perkembangan Keterampilan per Bulan (2025–2026)")
         top8 = [s for s, _ in ctr_f.most_common(8)]
-        rows = []
-        for _, row in df.dropna(subset=["year"]).iterrows():
-            yr = int(row["year"])
-            if 2022 <= yr <= 2026:
+        rows_m = []
+        for _, row in df.dropna(subset=["year_month"]).iterrows():
+            if row["year"] in [2025, 2026]:
                 for sk in row["skills_list"]:
                     if sk in top8:
-                        rows.append({"Year": yr, "Skill": sk})
-        if rows:
-            tgrp = pd.DataFrame(rows).groupby(["Year", "Skill"]).size().reset_index(name="Count")
-            fig2 = px.line(tgrp, x="Year", y="Count", color="Skill", markers=True,
-                           line_shape="spline",
-                           color_discrete_sequence=px.colors.qualitative.Plotly)
-            fig2.update_traces(line_width=2.5, hovertemplate="<b>%{color}</b><br>Tahun %{x}<br>Lowongan: %{y}<extra></extra>")
-            fig2.update_layout(**make_layout(380))
+                        rows_m.append({"YearMonth": row["year_month"], "Skill": sk})
+        if rows_m:
+            tgrp = (pd.DataFrame(rows_m)
+                    .groupby(["YearMonth", "Skill"]).size()
+                    .reset_index(name="Count"))
+            tgrp["MonthLabel"] = tgrp["YearMonth"].dt.strftime("%b %Y")
+            tgrp = tgrp.sort_values("YearMonth")
+
+            SKILL_COLORS = px.colors.qualitative.Plotly
+            fig2 = go.Figure()
+            for i, sk in enumerate(top8):
+                sk_df = tgrp[tgrp["Skill"] == sk].sort_values("YearMonth")
+                if sk_df.empty:
+                    continue
+                col = SKILL_COLORS[i % len(SKILL_COLORS)]
+                # Tambahkan mode text hanya di titik terakhir
+                n = len(sk_df)
+                modes = ["lines+markers"] * n
+                texts = [""] * n
+                texts[-1] = f" {sk}"
+                textpos = ["middle right"] * n
+                fig2.add_trace(go.Scatter(
+                    x=sk_df["MonthLabel"], y=sk_df["Count"],
+                    mode="lines+markers+text",
+                    name=sk,
+                    line=dict(color=col, width=2.5),
+                    marker=dict(size=6, color=col),
+                    text=texts,
+                    textposition=textpos,
+                    textfont=dict(color=col, size=10, family="Inter, sans-serif"),
+                    hovertemplate=f"<b>{sk}</b><br>%{{x}}<br>Kemunculan: %{{y}}<extra></extra>",
+                ))
+            fig2.update_layout(
+                xaxis_title="Bulan", yaxis_title="Jumlah Kemunculan",
+                xaxis=dict(tickangle=-35),
+                showlegend=False,
+                **make_layout(420),
+            )
             apply_axes(fig2)
-            apply_legend(fig2)
             st.plotly_chart(fig2, use_container_width=True)
         else:
-            st.info("Pilih filter tahun yang memiliki data untuk melihat tren.")
+            st.info("Data tren keterampilan per bulan untuk 2025–2026 belum tersedia.")
 
     with tab2:
         if not df.empty:
@@ -843,11 +881,23 @@ elif page == "Hiring Trends":
             
             c1, c2 = st.columns([3, 2], gap="medium")
             with c1:
-                fig = lollipop(
-                    comp, "avg_applicants", "role_label",
-                    color=VIOLET, height=660,
-                    x_label="Rata-rata Pelamar per Loker",
+                fig = px.bar(
+                    comp, x="avg_applicants", y="role_label", orientation="h",
+                    text="avg_applicants", color="avg_applicants",
+                    color_continuous_scale="Blues",
                 )
+                fig.update_traces(
+                    texttemplate="%{text:.0f}", textposition="outside",
+                    marker_line_width=0,
+                    hovertemplate="<b>%{y}</b><br>Rata-rata Pelamar: %{x:.0f}<extra></extra>",
+                )
+                fig.update_coloraxes(showscale=False)
+                fig.update_layout(
+                    yaxis_categoryorder="total ascending",
+                    xaxis_title="Rata-rata Jumlah Pelamar per Lowongan", yaxis_title="",
+                    **make_layout(660),
+                )
+                apply_axes(fig)
                 st.plotly_chart(fig, use_container_width=True)
             with c2:
                 fig2 = px.scatter(comp, x="total_jobs", y="avg_applicants",
@@ -866,7 +916,7 @@ elif page == "Hiring Trends":
             st.warning("Tidak ada data untuk memetakan tingkat kompetisi.")
 
     with tab2:
-        st.subheader("Porsi Penerapan Model Kerja Remote")
+        st.subheader("Tingkat Keterbukaan Kerja Remote per Peran IT")
         
         df_rm = df.dropna(subset=["workRemoteAllowed"]).copy()
         if not df_rm.empty:
@@ -893,18 +943,25 @@ elif page == "Hiring Trends":
                 if not rr2.empty:
                     st.markdown(kpi_card("Role Paling Terbuka", f"{rr2.iloc[0]['role_label']}"), unsafe_allow_html=True)
             with c2:
-                fig = hbar(rr2, "pct", "role_label", color_scale="Greens", height=560, x_label="Adopsi Kerja Remote (%)")
-                fig.add_vline(x=avg_r, line_dash="dash", line_color=AMBER,
-                              annotation_text=f"Rata-rata Pasar {avg_r:.1f}%",
-                              annotation_font_color=AMBER)
+                fig = hbar(rr2, "pct", "role_label", color_scale="Greens", height=560, x_label="Persentase Kerja Remote (%)")
+                fig.add_vline(
+                    x=avg_r, line_dash="dash", line_color=AMBER,
+                    annotation=dict(
+                        text=f"Rata-rata {avg_r:.1f}%",
+                        xanchor="center", yanchor="bottom",
+                        y=1.02, font=dict(color=AMBER, size=11),
+                        showarrow=False,
+                    ),
+                )
                 st.plotly_chart(fig, use_container_width=True)
         else:
             st.info("Pilih filter tahun/role lain yang merekam data workRemoteAllowed.")
 
     with tab3:
-        st.subheader("Klasifikasi Pengalaman Kerja & Jenis Kontrak")
+        st.subheader("Profil Tingkat Pengalaman & Jenis Kontrak Pekerjaan")
         df_sen = df[df["seniorityLevel"].isin(SEN_ORDER)].copy()
-        
+        CARD_H = 320   # tinggi seragam untuk semua chart dalam tab ini
+
         c1, c2 = st.columns(2, gap="medium")
         with c1:
             st.markdown("#### Distribusi Tingkat Senioritas")
@@ -915,12 +972,12 @@ elif page == "Hiring Trends":
                              color_discrete_sequence=px.colors.qualitative.Pastel)
                 fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=11,
                                    hovertemplate="<b>%{label}</b><br>Jumlah: %{value} (%{percent})<extra></extra>")
-                fig.update_layout(**make_layout(300))
+                fig.update_layout(**make_layout(CARD_H))
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("Tidak ada data senioritas pada filter aktif.")
         with c2:
-            st.markdown("#### Proporsi Senioritas per Role Utama (Top 8)")
+            st.markdown("#### Komposisi Senioritas per Peran Utama (Top 8)")
             if not df_sen.empty:
                 sr   = df_sen.groupby(["role_label", "seniorityLevel"]).size().unstack(fill_value=0)
                 sp   = sr.div(sr.sum(axis=1), axis=0) * 100
@@ -930,48 +987,66 @@ elif page == "Hiring Trends":
                 fig2 = px.bar(sp[ex].reset_index(), y="role_label", x=ex,
                               barmode="stack", orientation="h",
                               color_discrete_sequence=px.colors.qualitative.Pastel)
-                fig2.update_layout(xaxis_title="Persentase Komposisi (%)", yaxis_title="", legend_title="Level",
-                                   **make_layout(300))
-                fig2.update_traces(hovertemplate="Role: %{y}<br>Komposisi: %{x:.1f}%<extra></extra>")
+                fig2.update_layout(xaxis_title="Komposisi (%)", yaxis_title="", legend_title="Level",
+                                   **make_layout(CARD_H))
+                fig2.update_traces(hovertemplate="Peran: %{y}<br>Komposisi: %{x:.1f}%<extra></extra>")
                 apply_axes(fig2)
                 apply_legend(fig2)
                 st.plotly_chart(fig2, use_container_width=True)
             else:
-                st.info("Data role senioritas tidak ditemukan.")
+                st.info("Data komposisi senioritas per peran tidak tersedia.")
 
-        st.subheader("Pola Perekrutan Berdasarkan Jenis Kemitraan")
+        st.divider()
+        st.subheader("Komposisi Jenis Kontrak Pekerjaan")
         c1, c2 = st.columns(2, gap="medium")
         with c1:
-            st.markdown("#### Struktur Global Employment Type")
+            st.markdown("#### Proporsi Jenis Kontrak")
             if not df.empty:
-                em = df["employmentType"].value_counts().reset_index()
+                em = df["employmentType"].dropna().value_counts().reset_index()
                 em.columns = ["type", "count"]
-                fig = px.pie(em, values="count", names="type", hole=0.5,
-                             color_discrete_sequence=px.colors.qualitative.Pastel)
-                fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=11,
+                # Kelompokkan: Full-Time, Kontrak, sisanya → Lainnya
+                def _map_emptype(t):
+                    t_up = str(t).upper().replace("-", "_").replace(" ", "_")
+                    if "FULL" in t_up:
+                        return "Penuh Waktu (Full-Time)"
+                    elif "CONTRACT" in t_up:
+                        return "Kontrak"
+                    else:
+                        return "Lainnya"
+                em["type_grouped"] = em["type"].apply(_map_emptype)
+                em_grouped = em.groupby("type_grouped", as_index=False)["count"].sum()
+                fig = px.pie(
+                    em_grouped, values="count", names="type_grouped", hole=0.5,
+                    color_discrete_sequence=[BLUE, AMBER, MUTED],
+                )
+                fig.update_traces(textposition="inside", textinfo="percent+label", textfont_size=12,
                                    hovertemplate="<b>%{label}</b><br>Jumlah: %{value} (%{percent})<extra></extra>")
-                fig.update_layout(showlegend=False, **make_layout(270))
+                fig.update_layout(showlegend=False, **make_layout(CARD_H))
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("Data jenis kontrak tidak tersedia.")
         with c2:
-            st.markdown("#### Proporsi Jenis Kontrak per Role Utama (Top 6)")
+            st.markdown("#### Proporsi Jenis Kontrak per Peran Utama (Top 6)")
             if not df.empty:
                 top6 = df["role_label"].value_counts().head(6).index
-                er   = (df[df["role_label"].isin(top6)]
-                        .groupby(["role_label", "employmentType"]).size().unstack(fill_value=0))
+                df_top6 = df[df["role_label"].isin(top6)].copy()
+                df_top6["emp_grouped"] = df_top6["employmentType"].apply(
+                    lambda t: "Penuh Waktu" if "FULL" in str(t).upper()
+                    else ("Kontrak" if "CONTRACT" in str(t).upper() else "Lainnya")
+                )
+                er   = df_top6.groupby(["role_label", "emp_grouped"]).size().unstack(fill_value=0)
                 ep   = er.div(er.sum(axis=1), axis=0) * 100
                 fig2 = px.bar(ep.reset_index(), y="role_label",
                               x=[c for c in ep.columns], barmode="stack", orientation="h",
-                              color_discrete_sequence=px.colors.qualitative.Pastel)
-                fig2.update_layout(xaxis_title="Persentase Komposisi (%)", yaxis_title="", legend_title="Tipe",
-                                   **make_layout(270))
-                fig2.update_traces(hovertemplate="Role: %{y}<br>Komposisi: %{x:.1f}%<extra></extra>")
+                              color_discrete_sequence=[BLUE, AMBER, MUTED])
+                fig2.update_layout(xaxis_title="Komposisi (%)", yaxis_title="", legend_title="Jenis Kontrak",
+                                   **make_layout(CARD_H))
+                fig2.update_traces(hovertemplate="Peran: %{y}<br>Komposisi: %{x:.1f}%<extra></extra>")
                 apply_axes(fig2)
                 apply_legend(fig2)
                 st.plotly_chart(fig2, use_container_width=True)
             else:
-                st.info("Pola jenis kontrak tidak tersedia.")
+                st.info("Data komposisi kontrak per peran tidak tersedia.")
 
 
 # ─────────────────────────────────────────────────────────────────
