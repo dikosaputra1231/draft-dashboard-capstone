@@ -462,7 +462,7 @@ with st.sidebar:
     
     page = st.radio(
         "nav",
-        ["Overview", "Skill Demand", "Hiring Trends", "Course Supply", "A/B Testing"],
+        ["Overview", "Skill Demand", "Hiring Trends", "Course Supply"],
         label_visibility="collapsed",
     )
     
@@ -919,6 +919,9 @@ elif page == "Hiring Trends":
         st.subheader("Tingkat Keterbukaan Kerja Remote per Peran IT")
         
         df_rm = df.dropna(subset=["workRemoteAllowed"]).copy()
+        # Filter tambahan: pastikan role_label tidak None/null atau 'undefined'
+        df_rm = df_rm[df_rm["role_label"].notna()]
+        df_rm = df_rm[df_rm["role_label"].str.strip().str.lower() != "undefined"]
         if not df_rm.empty:
             df_rm["is_remote"] = df_rm["workRemoteAllowed"].astype(float).astype(bool)
             rr2 = (df_rm.groupby("role_label")
@@ -1241,150 +1244,4 @@ elif page == "Course Supply":
                 st.warning(f"Belum ada kursus di Coursera yang ter-mapping secara pas untuk role '{rs3}' dengan filter saat ini.")
 
 
-# ─────────────────────────────────────────────────────────────────
-# PAGE: A/B TESTING
-# ─────────────────────────────────────────────────────────────────
-elif page == "A/B Testing":
-    page_header(
-        "Validasi Eksperimen Algoritma (A/B Testing)",
-        "Membandingkan efektivitas strategi penataan model mapping rekomendasi karir berbasis kurikulum."
-    )
-    
-    st.info(
-        "**Hipotesis Pengujian:**  \n"
-        "**H₀ (Null Hypothesis):** Tidak terdapat perbedaan akurasi yang signifikan antara kedua strategi rekomendasi.  \n"
-        "**H₁ (Alternative Hypothesis):** Strategi B (Cosine Similarity) memiliki tingkat akurasi presisi yang lebih unggul dibanding Strategi A.  \n"
-        "**Tingkat Signifikansi (α):** 0.05  ·  **Metrik Utama:** Precision@1  ·  **Pembagian Sampel:** 20% Data LinkedIn (Test Set)"
-    )
 
-    @st.cache_data(ttl=7200)
-    def run_ab():
-        from sklearn.model_selection import train_test_split
-        from scipy import stats as sp
-
-        dfab = pd.read_csv(JOBS_PATH)
-        dfab["skills_list"] = dfab["hard_skills"].apply(
-            lambda x: [s.strip() for s in str(x).split(",") if s.strip()]
-            if pd.notna(x) else []
-        )
-        s_all: list = []
-        dfab["skills_list"].apply(lambda l: s_all.extend(l))
-        freq = Counter(s_all)
-        sel2 = sorted([s for s, c in freq.items() if c >= 20])
-
-        mlb2 = MultiLabelBinarizer(classes=sel2)
-        mlb2.fit_transform(dfab["skills_list"])
-
-        tr, te = train_test_split(dfab, test_size=0.2, random_state=42,
-                                  stratify=dfab["role_label"])
-        Xtr = mlb2.transform(tr["skills_list"])
-        Xte = mlb2.transform(te["skills_list"])
-        yte = te["role_label"].values
-
-        trm = pd.DataFrame(Xtr, columns=mlb2.classes_)
-        trm["role_label"] = tr["role_label"].values
-        rp  = trm.groupby("role_label").mean()
-        ro  = rp.index.tolist()
-
-        rt3 = {r: set(rp.loc[r].nlargest(3).index) for r in ro}
-        def pred_a(skills):
-            best, bs = None, -1
-            for r, t3 in rt3.items():
-                sc = len(set(skills) & t3)
-                if sc > bs: bs, best = sc, r
-            return best or "Software Engineer"
-
-        pA = [pred_a(te["skills_list"].iloc[i]) for i in range(len(te))]
-        pB = [ro[np.argmax(cosine_similarity(Xte[i:i+1], rp.values)[0])]
-              for i in range(len(Xte))]
-
-        aA = np.mean(np.array(pA) == yte)
-        aB = np.mean(np.array(pB) == yte)
-        cA = (np.array(pA) == yte).astype(int)
-        cB = (np.array(pB) == yte).astype(int)
-        b  = ((cA == 1) & (cB == 0)).sum(); c = ((cA == 0) & (cB == 1)).sum()
-        st2 = (abs(b - c) - 1) ** 2 / (b + c) if (b + c) > 0 else 0
-        pv  = sp.chi2.sf(st2, df=1)
-        np.random.seed(42)
-        diffs = np.array([
-            cB[np.random.choice(len(cA), len(cA), replace=True)].mean() -
-            cA[np.random.choice(len(cA), len(cA), replace=True)].mean()
-            for _ in range(3000)
-        ])
-        return aA, aB, pv, diffs, len(yte)
-
-    with st.spinner("Sedang mengevaluasi performa model di latar belakang..."):
-        aA, aB, pv, boot, n_te = run_ab()
-
-    ci_lo  = np.percentile(boot, 2.5) * 100
-    ci_hi  = np.percentile(boot, 97.5) * 100
-    mean_d = boot.mean() * 100
-
-    # Custom Centered KPI Card Grid for A/B metrics
-    k1, k2, k3, k4 = st.columns(4)
-    k1.markdown(kpi_card("Strategi A (Top-3 Heuristik)", f"{aA * 100:.2f}%"), unsafe_allow_html=True)
-    k2.markdown(kpi_card("Strategi B (Cosine Similarity)", f"{aB * 100:.2f}%", delta=f"{(aB - aA) * 100:+.2f}%"), unsafe_allow_html=True)
-    k3.markdown(kpi_card("McNemar p-value", f"{pv:.4f}"), unsafe_allow_html=True)
-    
-    decision = "Tolak H₀ (Signifikan)" if pv < 0.05 else "Gagal Tolak H₀"
-    k4.markdown(kpi_card("Keputusan Statistik", decision), unsafe_allow_html=True)
-
-    st.divider()
-    c1, c2 = st.columns(2, gap="medium")
-    with c1:
-        st.subheader("Komparasi Akurasi Pemetaan Precision@1")
-        fig = go.Figure(go.Bar(
-            x=["Strategi A<br>(Top-3 Heuristik)", "Strategi B<br>(Cosine Similarity)"],
-            y=[aA * 100, aB * 100],
-            text=[f"{aA * 100:.2f}%", f"{aB * 100:.2f}%"],
-            textposition="outside",
-            textfont_color=TEXT,
-            marker_color=[MUTED, BLUE],
-            marker_line_width=0,
-        ))
-        fig.update_layout(yaxis_range=[0, max(aA, aB) * 132],
-                          yaxis_title="Precision@1 (%)",
-                          **make_layout(330))
-        apply_axes(fig)
-        fig.update_traces(hovertemplate="Strategi: %{x}<br>Akurasi: %{y:.2f}%<extra></extra>")
-        st.plotly_chart(fig, use_container_width=True)
-    with c2:
-        st.subheader("Distribusi Bootstrap (Selisih Akurasi B − A)")
-        fig2 = go.Figure()
-        fig2.add_trace(go.Histogram(x=boot * 100, nbinsx=50,
-                                    marker_color=BLUE, opacity=0.8))
-        fig2.add_vline(x=mean_d, line_dash="dash",  line_color=RED,
-                       annotation_text=f"Rerata {mean_d:+.2f}%",
-                       annotation_font_color=RED)
-        fig2.add_vline(x=ci_lo,  line_dash="dot",   line_color=AMBER,
-                       annotation_text=f"{ci_lo:+.1f}%",
-                       annotation_font_color=AMBER)
-        fig2.add_vline(x=ci_hi,  line_dash="dot",   line_color=AMBER,
-                       annotation_text=f"{ci_hi:+.1f}%",
-                       annotation_font_color=AMBER)
-        fig2.add_vline(x=0, line_color=MUTED, opacity=0.5)
-        fig2.update_layout(xaxis_title="Selisih Akurasi B−A (%)",
-                           yaxis_title="Frekuensi Distribusi",
-                           **make_layout(330))
-        apply_axes(fig2)
-        fig2.update_traces(hovertemplate="Selisih: %{x:.2f}%<br>Frekuensi: %{y}<extra></extra>")
-        st.plotly_chart(fig2, use_container_width=True)
-        st.caption(f"Interval Kepercayaan 95%: [{ci_lo:+.2f}%, {ci_hi:+.2f}%] — {n_te:,} Sampel Uji")
-
-    st.divider()
-    st.subheader("Kesimpulan Uji Statistik & Rekomendasi QLOP")
-    if pv < 0.05:
-        winner = "Strategi B (Cosine Similarity)" if aB > aA else "Strategi A (Top-3)"
-        st.success(
-            f"**H₀ Ditolak** secara meyakinkan (p = {pv:.4f} < 0.05).  \n"
-            f"Terdapat perbedaan akurasi yang **sangat signifikan** secara statistik antara kedua model rekomendasi.  \n"
-            f"**{winner}** terbukti memberikan performa pencocokan CV ke opsi karir yang lebih presisi.  \n\n"
-            f"Estimasi keunggulan: {(aB - aA) * 100:+.2f}%  ·  Cakupan CI 95%: [{ci_lo:+.2f}%, {ci_hi:+.2f}%]"
-        )
-    else:
-        st.warning(
-            f"**Gagal Tolak H₀** (p = {pv:.4f} ≥ 0.05).  \n"
-            f"Perbedaan efisiensi antara kedua algoritma tidak menunjukkan hasil yang signifikan secara statistik pada ukuran data uji ini.  \n\n"
-            f"**Rekomendasi Teknis:** Disarankan untuk tetap menggunakan **Strategi B (Cosine Similarity)** di sistem produksi QLOP "
-            f"karena terbukti lebih scalable dan mampu memanfaatkan seluruh dimensi representasi keahlian."
-        )
